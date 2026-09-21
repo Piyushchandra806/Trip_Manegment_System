@@ -13,7 +13,7 @@ export default function PassengerDetail() {
   const [toast, setToast] = useState('');
 
   // Form states
-  const [detailsForm, setDetailsForm] = useState({ name: '', mobile: '', familyName: '' });
+  const [detailsForm, setDetailsForm] = useState({ name: '', mobile: '', familyName: '', age: '', relativeName: '', address: '', gender: '' });
   const [trainForm, setTrainForm] = useState({ coach: '', berth: '', berthType: '' });
   const [newHotel, setNewHotel] = useState({ day: '', date: '', hotelName: '', floor: '', room: '' });
 
@@ -24,7 +24,15 @@ export default function PassengerDetail() {
         const p = data.find(x => x.passengerId === idParam);
         if (p) {
           setPassenger(p);
-          setDetailsForm({ name: p.name, mobile: p.mobile, familyName: p.familyName });
+          setDetailsForm({ 
+            name: p.name || '', 
+            mobile: p.mobile || '', 
+            familyName: p.familyName || '',
+            age: p.age || '',
+            relativeName: p.relativeName || '',
+            address: p.address || '',
+            gender: p.gender || ''
+          });
           if (p.train) {
             setTrainForm({ trainName: p.train.trainName || "", trainNumber: p.train.trainNumber || "", coachNumber: p.train.coach || "", berthNumber: p.train.berth || "", berthType: p.train.berthType || "" });
           }
@@ -143,6 +151,16 @@ export default function PassengerDetail() {
             <input type="text" value={detailsForm.mobile} onChange={e => setDetailsForm({...detailsForm, mobile: e.target.value})} className="mt-1 w-full px-3 py-2 border rounded-xl" required />
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Age</label>
+              <input type="number" value={detailsForm.age} onChange={e => setDetailsForm({...detailsForm, age: e.target.value})} className="mt-1 w-full px-3 py-2 border rounded-xl" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Father/Husband Name</label>
+              <input type="text" value={detailsForm.relativeName} onChange={e => setDetailsForm({...detailsForm, relativeName: e.target.value})} className="mt-1 w-full px-3 py-2 border rounded-xl" />
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700">Father/Husband Name</label>

@@ -83,7 +83,11 @@ export default function PassengersList() {
   const handleExport = () => {
     const exportData = filteredData.map(p => ({
       Name: p.name,
-      Mobile: p.mobile,
+      Age: p.age || '',
+      Gender: p.gender || '',
+      "Father/Husband": p.relativeName || '',
+      Mobile: p.mobile || '',
+      Address: p.address || '',
       Family: p.familyName,
       Coach: p.coach,
       Berth: p.berth,
@@ -167,8 +171,11 @@ export default function PassengersList() {
                 <th className="p-4 font-bold text-slate-700 cursor-pointer hover:bg-slate-100" onClick={() => handleSort('name')}>
                   Name {sortField === 'name' && (sortAsc ? '↑' : '↓')}
                 </th>
+                <th className="p-4 font-bold text-slate-700">Age</th>
+                <th className="p-4 font-bold text-slate-700">Sex</th>
+                <th className="p-4 font-bold text-slate-700">Rel. Name</th>
+                <th className="p-4 font-bold text-slate-700">Address</th>
                 <th className="p-4 font-bold text-slate-700">Mobile</th>
-                <th className="p-4 font-bold text-slate-700">Aadhaar</th>
                 <th className="p-4 font-bold text-slate-700 cursor-pointer hover:bg-slate-100" onClick={() => handleSort('familyName')}>
                   Family {sortField === 'familyName' && (sortAsc ? '↑' : '↓')}
                 </th>
@@ -186,6 +193,10 @@ export default function PassengersList() {
               {filteredData.map(p => (
                 <tr key={p.mobile} className="border-b border-slate-100 hover:bg-slate-50 print:border-slate-300">
                   <td className="p-4 font-medium text-slate-800">{p.name}</td>
+                  <td className="p-4 text-slate-600">{p.age || '-'}</td>
+                  <td className="p-4 text-slate-600">{p.gender || '-'}</td>
+                  <td className="p-4 text-slate-600">{p.relativeName || '-'}</td>
+                  <td className="p-4 text-slate-600">{p.address || '-'}</td>
                   <td className="p-4 text-slate-600">{p.mobile}</td>
                   <td className="p-4 text-slate-600">{(p.familyName && p.familyName !== 'Unknown') ? p.familyName : <span className="text-amber-500">⚠ Missing</span>}</td>
                   <td className="p-4 text-slate-600">{p.coach || <span className="text-amber-500">⚠</span>}</td>
