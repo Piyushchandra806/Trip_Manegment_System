@@ -18,7 +18,8 @@ export default function WhatsAppHelpButton() {
     return null; 
   }
 
-  let messageText = 'Hello, I need help regarding my trip details.';
+  let messageText = 'Hello, I need help regarding my trip details.
+नमस्ते, मुझे अपनी यात्रा के विवरण के संबंध में सहायता चाहिए।';
   if (passenger && passenger.mobile) {
     const maskedMobile = `********${String(passenger.mobile).slice(-4)}`;
     messageText += `\n\nName: ${passenger.name}\nMobile: ${maskedMobile}`;
