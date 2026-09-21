@@ -194,7 +194,7 @@ export default function PassengersList() {
                     {p.hotel ? `${p.hotel} / ${p.room}` : <span className="text-amber-500">⚠ Missing</span>}
                   </td>
                   <td className="p-4 text-right print:hidden">
-                    <Link href={`/admin/passengers/${p.mobile}`} className="text-blue-600 hover:text-blue-800 font-medium bg-blue-50 px-3 py-1.5 rounded-lg">
+                    <Link href={`/admin/passengers/${p.passengerId}`} className="text-blue-600 hover:text-blue-800 font-medium bg-blue-50 px-3 py-1.5 rounded-lg">
                       View
                     </Link>
                   </td>

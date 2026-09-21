@@ -6,7 +6,7 @@ import Link from 'next/link';
 export default function PassengerDetail() {
   const params = useParams();
   const router = useRouter();
-  const mobileParam = params.mobile;
+  const idParam = params.id;
 
   const [passenger, setPassenger] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,7 +21,7 @@ export default function PassengerDetail() {
     fetch('/api/admin/passengers')
       .then(res => res.json())
       .then(data => {
-        const p = data.find(x => x.mobile === mobileParam);
+        const p = data.find(x => x.passengerId === idParam);
         if (p) {
           setPassenger(p);
           setDetailsForm({ name: p.name, mobile: p.mobile, familyName: p.familyName });
@@ -35,7 +35,7 @@ export default function PassengerDetail() {
 
   useEffect(() => {
     fetchPassenger();
-  }, [mobileParam]);
+  }, [idParam]);
 
   const showToast = (msg) => {
     setToast(msg);
@@ -45,18 +45,14 @@ export default function PassengerDetail() {
   const handleSaveDetails = async (e) => {
     e.preventDefault();
     if (!window.confirm('Are you sure you want to update these details?')) return;
-    const res = await fetch(`/api/admin/passengers/${mobileParam}`, {
+    const res = await fetch(`/api/admin/passengers/${idParam}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...detailsForm, newMobile: detailsForm.mobile })
     });
     if (res.ok) {
       showToast('✓ Changes saved successfully.');
-      if (detailsForm.mobile !== mobileParam) {
-        router.push(`/admin/passengers/${detailsForm.mobile}`);
-      } else {
-        fetchPassenger();
-      }
+      fetchPassenger();
     } else {
       res.json().then(data => showToast(data.error || 'We couldn\'t save the changes. Please try again.'));
     }
@@ -64,7 +60,7 @@ export default function PassengerDetail() {
 
   const handleSaveTrain = async (e) => {
     e.preventDefault();
-    const res = await fetch(`/api/admin/train/${mobileParam}`, {
+    const res = await fetch(`/api/admin/train/${idParam}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(trainForm)
@@ -79,7 +75,7 @@ export default function PassengerDetail() {
 
   const handleAddHotel = async (e) => {
     e.preventDefault();
-    const res = await fetch(`/api/admin/hotels/${mobileParam}`, {
+    const res = await fetch(`/api/admin/hotels/${idParam}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newHotel)
@@ -96,7 +92,7 @@ export default function PassengerDetail() {
   
   const handleDeletePassenger = async () => {
     if (!window.confirm('WARNING: Are you absolutely sure you want to delete this passenger and all their allocations? This action cannot be undone.')) return;
-    const res = await fetch(`/api/admin/passengers/${mobileParam}`, { method: 'DELETE' });
+    const res = await fetch(`/api/admin/passengers/${idParam}`, { method: 'DELETE' });
     if (res.ok) {
       alert('Passenger deleted successfully.');
       router.push('/admin/passengers');
@@ -107,7 +103,7 @@ export default function PassengerDetail() {
 
   const handleDeleteHotel = async (day) => {
     if (!window.confirm('Are you sure you want to remove this hotel stay?')) return;
-    const res = await fetch(`/api/admin/hotels/${mobileParam}/${day}`, {
+    const res = await fetch(`/api/admin/hotels/${idParam}/${day}`, {
       method: 'DELETE'
     });
     if (res.ok) {

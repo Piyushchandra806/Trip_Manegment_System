@@ -9,8 +9,7 @@ export async function GET(request, { params }) {
 
     const { db } = await connectToDatabase();
     
-    // Admin scoping
-    const passenger = await db.collection("passengers").findOne({ mobile: (await params).mobile, adminId: admin.adminId });
+    const passenger = await db.collection("passengers").findOne({ passengerId: (await params).id, adminId: admin.adminId });
     if (!passenger) {
       return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
     }
@@ -21,11 +20,6 @@ export async function GET(request, { params }) {
       if (family) familyName = family.familyName;
     }
 
-    // Mask Aadhaar for Admin UI (as requested, or maybe they need to edit it? Assuming they can edit but we mask it for GET)
-    // Wait, if they need to edit, we should send the real one. The prompt says "Prefer displaying XXXX XXXX 9012 instead of full number".
-    // I will send the real one so the edit form works, the frontend can mask it in the table.
-    // Actually the prompt says "Prefer displaying XXXX XXXX 9012... Never put Aadhaar in URLs, Public APIs. Admin side: Only authenticated admins can access Aadhaar."
-    // Since this is an admin API and they might need to edit it, we return the real one here.
     return NextResponse.json({ ...passenger, familyName });
   } catch (error) {
     return NextResponse.json({ error: "Server Error" }, { status: 500 });
@@ -46,20 +40,11 @@ export async function PUT(request, { params }) {
 
     const { db } = await connectToDatabase();
     
-    const { mobile } = await params;
-    console.log("PUT request details:", { mobile, adminId: admin.adminId, newMobile, paramsMobile: params.mobile });
+    const { id } = await params;
     
-    const passenger = await db.collection("passengers").findOne({ mobile: mobile, adminId: admin.adminId });
+    const passenger = await db.collection("passengers").findOne({ passengerId: id, adminId: admin.adminId });
     if (!passenger) {
       return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
-    }
-
-    // If mobile changed, check if new mobile exists
-    if (mobile !== newMobile) {
-      const existing = await db.collection("passengers").findOne({ mobile: newMobile });
-      if (existing) {
-        return NextResponse.json({ error: "New mobile number already exists" }, { status: 400 });
-      }
     }
 
     await db.collection("passengers").updateOne(
@@ -86,7 +71,7 @@ export async function DELETE(request, { params }) {
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { db } = await connectToDatabase();
-    const passenger = await db.collection("passengers").findOne({ mobile: (await params).mobile, adminId: admin.adminId });
+    const passenger = await db.collection("passengers").findOne({ passengerId: (await params).id, adminId: admin.adminId });
     
     if (!passenger) {
       return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });

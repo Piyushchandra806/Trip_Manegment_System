@@ -158,7 +158,7 @@ export default function FamiliesList() {
                     </div>
                   </div>
                   <div className="flex flex-col gap-2 min-w-[140px]">
-                    <Link href={`/admin/passengers/${m.mobile}`} className="text-sm text-center bg-slate-800 text-white px-4 py-1.5 rounded-lg font-semibold hover:bg-slate-700">
+                    <Link href={`/admin/passengers/${m.passengerId}`} className="text-sm text-center bg-slate-800 text-white px-4 py-1.5 rounded-lg font-semibold hover:bg-slate-700">
                       Edit
                     </Link>
                     <select 
