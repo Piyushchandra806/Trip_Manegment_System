@@ -1,0 +1,12 @@
+[
+  {
+    "hotelId": "H000001",
+    "hotelName": "Demo Hotel A",
+    "isDemo": true
+  },
+  {
+    "hotelId": "H000002",
+    "hotelName": "Demo Hotel B",
+    "isDemo": true
+  }
+]

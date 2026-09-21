@@ -1,0 +1,92 @@
+[
+  {
+    "allocationId": "A000001",
+    "passengerId": "P000001",
+    "trainId": "T000001",
+    "coachId": "C000001",
+    "coachNumber": "S4",
+    "berthNumber": "21",
+    "berthType": "Lower",
+    "isDemo": true
+  },
+  {
+    "allocationId": "A000002",
+    "passengerId": "P000002",
+    "trainId": "T000001",
+    "coachId": "C000001",
+    "coachNumber": "S4",
+    "berthNumber": "22",
+    "berthType": "Middle",
+    "isDemo": true
+  },
+  {
+    "allocationId": "A000003",
+    "passengerId": "P000003",
+    "trainId": "T000001",
+    "coachId": "C000001",
+    "coachNumber": "S4",
+    "berthNumber": "23",
+    "berthType": "Upper",
+    "isDemo": true
+  },
+  {
+    "allocationId": "A000004",
+    "passengerId": "P000004",
+    "trainId": "T000001",
+    "coachId": "C000001",
+    "coachNumber": "S4",
+    "berthNumber": "24",
+    "berthType": "Lower",
+    "isDemo": true
+  },
+  {
+    "allocationId": "A000005",
+    "passengerId": "P000005",
+    "trainId": "T000001",
+    "coachId": "C000002",
+    "coachNumber": "S5",
+    "berthNumber": "11",
+    "berthType": "Lower",
+    "isDemo": true
+  },
+  {
+    "allocationId": "A000006",
+    "passengerId": "P000006",
+    "trainId": "T000001",
+    "coachId": "C000002",
+    "coachNumber": "S5",
+    "berthNumber": "12",
+    "berthType": "Middle",
+    "isDemo": true
+  },
+  {
+    "allocationId": "A000007",
+    "passengerId": "P000007",
+    "trainId": "T000001",
+    "coachId": "C000003",
+    "coachNumber": "B1",
+    "berthNumber": "41",
+    "berthType": "Lower",
+    "isDemo": true
+  },
+  {
+    "allocationId": "A000008",
+    "passengerId": "P000008",
+    "trainId": "T000001",
+    "coachId": "C000003",
+    "coachNumber": "B1",
+    "berthNumber": "42",
+    "berthType": "Middle",
+    "isDemo": true
+  },
+  {
+    "allocationId": "A000009",
+    "passengerId": "P000009",
+    "trainId": "T000001",
+    "coachId": "C000003",
+    "coachNumber": "B1",
+    "berthNumber": "43",
+    "berthType": "Upper",
+    "isDemo": true
+  }
+]

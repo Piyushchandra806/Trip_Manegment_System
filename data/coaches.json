@@ -1,0 +1,23 @@
+[
+  {
+    "coachId": "C000001",
+    "trainId": "T000001",
+    "coachNumber": "S4",
+    "coachType": "Sleeper",
+    "isDemo": true
+  },
+  {
+    "coachId": "C000002",
+    "trainId": "T000001",
+    "coachNumber": "S5",
+    "coachType": "Sleeper",
+    "isDemo": true
+  },
+  {
+    "coachId": "C000003",
+    "trainId": "T000001",
+    "coachNumber": "B1",
+    "coachType": "Sleeper",
+    "isDemo": true
+  }
+]

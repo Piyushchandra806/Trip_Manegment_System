@@ -1,0 +1,65 @@
+[
+  {
+    "passengerId": "P000001",
+    "name": "Rahul Sharma",
+    "mobile": "9000000001",
+    "familyId": "F000001",
+    "isDemo": true
+  },
+  {
+    "passengerId": "P000002",
+    "name": "Priya Sharma",
+    "mobile": "9000000002",
+    "familyId": "F000001",
+    "isDemo": true
+  },
+  {
+    "passengerId": "P000003",
+    "name": "Aarav Sharma",
+    "mobile": "9000000003",
+    "familyId": "F000001",
+    "isDemo": true
+  },
+  {
+    "passengerId": "P000004",
+    "name": "Siya Sharma",
+    "mobile": "9000000004",
+    "familyId": "F000001",
+    "isDemo": true
+  },
+  {
+    "passengerId": "P000005",
+    "name": "Amit Verma",
+    "mobile": "9000000005",
+    "familyId": "F000002",
+    "isDemo": true
+  },
+  {
+    "passengerId": "P000006",
+    "name": "Neha Verma",
+    "mobile": "9000000006",
+    "familyId": "F000002",
+    "isDemo": true
+  },
+  {
+    "passengerId": "P000007",
+    "name": "Rohit Singh",
+    "mobile": "9000000007",
+    "familyId": "F000003",
+    "isDemo": true
+  },
+  {
+    "passengerId": "P000008",
+    "name": "Pooja Singh",
+    "mobile": "9000000008",
+    "familyId": "F000003",
+    "isDemo": true
+  },
+  {
+    "passengerId": "P000009",
+    "name": "Karan Singh",
+    "mobile": "9000000009",
+    "familyId": "F000003",
+    "isDemo": true
+  }
+]

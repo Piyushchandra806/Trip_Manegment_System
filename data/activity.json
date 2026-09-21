@@ -1,0 +1,14 @@
+[
+  {
+    "id": "1789993764505",
+    "action": "Deleted Passenger",
+    "details": "Removed New User (9000000100) and their allocations",
+    "timestamp": "2026-09-21T12:29:24.505Z"
+  },
+  {
+    "id": "1789993729635",
+    "action": "Created Backup",
+    "details": "Downloaded full system backup",
+    "timestamp": "2026-09-21T12:28:49.635Z"
+  }
+]

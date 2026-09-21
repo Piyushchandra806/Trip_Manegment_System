@@ -1,0 +1,164 @@
+[
+  {
+    "hotelAllocationId": "HA000001",
+    "passengerId": "P000001",
+    "hotelId": "H000001",
+    "roomId": "R000001",
+    "day": "1",
+    "date": "",
+    "isDemo": true
+  },
+  {
+    "hotelAllocationId": "HA000002",
+    "passengerId": "P000001",
+    "hotelId": "H000002",
+    "roomId": "R000002",
+    "day": "2",
+    "date": "",
+    "isDemo": true
+  },
+  {
+    "hotelAllocationId": "HA000003",
+    "passengerId": "P000002",
+    "hotelId": "H000001",
+    "roomId": "R000001",
+    "day": "1",
+    "date": "",
+    "isDemo": true
+  },
+  {
+    "hotelAllocationId": "HA000004",
+    "passengerId": "P000002",
+    "hotelId": "H000002",
+    "roomId": "R000002",
+    "day": "2",
+    "date": "",
+    "isDemo": true
+  },
+  {
+    "hotelAllocationId": "HA000005",
+    "passengerId": "P000003",
+    "hotelId": "H000001",
+    "roomId": "R000001",
+    "day": "1",
+    "date": "",
+    "isDemo": true
+  },
+  {
+    "hotelAllocationId": "HA000006",
+    "passengerId": "P000003",
+    "hotelId": "H000002",
+    "roomId": "R000002",
+    "day": "2",
+    "date": "",
+    "isDemo": true
+  },
+  {
+    "hotelAllocationId": "HA000007",
+    "passengerId": "P000004",
+    "hotelId": "H000001",
+    "roomId": "R000001",
+    "day": "1",
+    "date": "",
+    "isDemo": true
+  },
+  {
+    "hotelAllocationId": "HA000008",
+    "passengerId": "P000004",
+    "hotelId": "H000002",
+    "roomId": "R000002",
+    "day": "2",
+    "date": "",
+    "isDemo": true
+  },
+  {
+    "hotelAllocationId": "HA000009",
+    "passengerId": "P000005",
+    "hotelId": "H000001",
+    "roomId": "R000003",
+    "day": "1",
+    "date": "",
+    "isDemo": true
+  },
+  {
+    "hotelAllocationId": "HA000010",
+    "passengerId": "P000005",
+    "hotelId": "H000002",
+    "roomId": "R000004",
+    "day": "2",
+    "date": "",
+    "isDemo": true
+  },
+  {
+    "hotelAllocationId": "HA000011",
+    "passengerId": "P000006",
+    "hotelId": "H000001",
+    "roomId": "R000003",
+    "day": "1",
+    "date": "",
+    "isDemo": true
+  },
+  {
+    "hotelAllocationId": "HA000012",
+    "passengerId": "P000006",
+    "hotelId": "H000002",
+    "roomId": "R000004",
+    "day": "2",
+    "date": "",
+    "isDemo": true
+  },
+  {
+    "hotelAllocationId": "HA000013",
+    "passengerId": "P000007",
+    "hotelId": "H000001",
+    "roomId": "R000005",
+    "day": "1",
+    "date": "",
+    "isDemo": true
+  },
+  {
+    "hotelAllocationId": "HA000014",
+    "passengerId": "P000007",
+    "hotelId": "H000002",
+    "roomId": "R000006",
+    "day": "2",
+    "date": "",
+    "isDemo": true
+  },
+  {
+    "hotelAllocationId": "HA000015",
+    "passengerId": "P000008",
+    "hotelId": "H000001",
+    "roomId": "R000005",
+    "day": "1",
+    "date": "",
+    "isDemo": true
+  },
+  {
+    "hotelAllocationId": "HA000016",
+    "passengerId": "P000008",
+    "hotelId": "H000002",
+    "roomId": "R000006",
+    "day": "2",
+    "date": "",
+    "isDemo": true
+  },
+  {
+    "hotelAllocationId": "HA000017",
+    "passengerId": "P000009",
+    "hotelId": "H000001",
+    "roomId": "R000005",
+    "day": "1",
+    "date": "",
+    "isDemo": true
+  },
+  {
+    "hotelAllocationId": "HA000018",
+    "passengerId": "P000009",
+    "hotelId": "H000002",
+    "roomId": "R000006",
+    "day": "2",
+    "date": "",
+    "isDemo": true
+  }
+]

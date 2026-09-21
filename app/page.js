@@ -1,69 +1,146 @@
-import Image from "next/image";
+import Link from "next/link";
 
-export default function Home() {
+export default function HomePage() {
+  const features = [
+    { icon: "🚆", label: "Train Seat", desc: "Coach, berth & seat type" },
+    { icon: "👨‍👩‍👧", label: "Family Seats", desc: "All family members together" },
+    { icon: "🏨", label: "Hotel", desc: "Hotel name & details" },
+    { icon: "🔑", label: "Room Number", desc: "Floor & room assignment" },
+  ];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.js
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-[calc(100vh-8rem)]">
+      {/* Hero section */}
+      <section className="relative overflow-hidden">
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-100 to-transparent" />
+
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-16 pb-12 sm:pt-20 lg:pt-28 sm:pb-16 lg:pb-20">
+          {/* Desktop: side-by-side hero | Mobile: stacked */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Left: Text content */}
+            <div className="text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 border border-slate-200 shadow-sm mb-6">
+                <span className="text-2xl">🚆</span>
+                <span className="text-sm font-semibold text-slate-700">
+                  Trip Management
+                </span>
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.5rem] font-bold text-slate-900 tracking-tight leading-tight">
+                Your complete trip information{" "}
+                <span className="text-slate-500">in one place</span>
+              </h1>
+
+              <p className="mt-4 text-base sm:text-lg text-slate-500 max-w-lg mx-auto lg:mx-0">
+                Find your train seat, family seat assignments, hotel details, and
+                room numbers — all with your mobile number.
+              </p>
+
+              <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                <Link
+                  href="/passenger"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-slate-900 text-white
+                             font-semibold text-base rounded-xl
+                             hover:bg-slate-800 active:bg-slate-950
+                             transition-colors duration-200
+                             shadow-lg shadow-slate-900/10"
+                >
+                  Find My Details
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+                <Link
+                  href="/admin"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-slate-700
+                             font-semibold text-base rounded-xl border border-slate-200
+                             hover:bg-slate-50 active:bg-slate-100
+                             transition-colors duration-200"
+                >
+                  Admin Panel
+                </Link>
+              </div>
+            </div>
+
+            {/* Right: Feature preview cards (desktop) */}
+            <div className="hidden lg:grid grid-cols-2 gap-4">
+              {features.map((feature) => (
+                <div
+                  key={feature.label}
+                  className="bg-white rounded-2xl border border-slate-200 p-6
+                             text-center hover:shadow-md hover:border-slate-300
+                             transition-all duration-200"
+                >
+                  <span className="text-4xl">{feature.icon}</span>
+                  <h3 className="mt-3 font-bold text-base text-slate-800">
+                    {feature.label}
+                  </h3>
+                  <p className="mt-1 text-xs text-slate-400">{feature.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Mobile feature cards (only on mobile/tablet) */}
+      <section className="lg:hidden max-w-5xl mx-auto px-4 sm:px-6 pb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {features.map((feature) => (
+            <div
+              key={feature.label}
+              className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6
+                         text-center hover:shadow-md hover:border-slate-300
+                         transition-all duration-200"
+            >
+              <span className="text-3xl sm:text-4xl">{feature.icon}</span>
+              <h3 className="mt-3 font-bold text-sm sm:text-base text-slate-800">
+                {feature.label}
+              </h3>
+              <p className="mt-1 text-xs text-slate-400">{feature.desc}</p>
+            </div>
+          ))}
         </div>
-      </main>
+      </section>
+
+      {/* How it works */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-16 sm:pb-24">
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 lg:p-12">
+          <h2 className="text-lg lg:text-xl font-bold text-slate-800 text-center">
+            How it works
+          </h2>
+          <div className="mt-6 lg:mt-10 grid grid-cols-1 sm:grid-cols-3 gap-6 lg:gap-12">
+            {[
+              {
+                step: "1",
+                title: "Enter your number",
+                desc: "Use the registered mobile number shared during booking.",
+              },
+              {
+                step: "2",
+                title: "View your details",
+                desc: "See your train coach, berth, and hotel room assignment.",
+              },
+              {
+                step: "3",
+                title: "Check family seats",
+                desc: "View all your family members' seat allocations at once.",
+              },
+            ].map((item) => (
+              <div key={item.step} className="text-center">
+                <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-slate-900 text-white flex items-center justify-center mx-auto font-bold text-sm lg:text-base">
+                  {item.step}
+                </div>
+                <h3 className="mt-3 font-semibold text-sm lg:text-base text-slate-800">
+                  {item.title}
+                </h3>
+                <p className="mt-1 text-xs lg:text-sm text-slate-500 max-w-xs mx-auto">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

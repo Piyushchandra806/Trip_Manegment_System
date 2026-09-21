@@ -1,0 +1,22 @@
+[
+  {
+    "familyId": "F000001",
+    "familyName": "Sharma Family",
+    "isDemo": true
+  },
+  {
+    "familyId": "F000002",
+    "familyName": "Verma Family",
+    "isDemo": true
+  },
+  {
+    "familyId": "F000003",
+    "familyName": "Singh Family",
+    "isDemo": true
+  },
+  {
+    "familyId": "F000004",
+    "familyName": "New Family",
+    "isDemo": true
+  }
+]

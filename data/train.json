@@ -1,0 +1,74 @@
+[
+  {
+    "mobile": "9000000001",
+    "coach": "S4",
+    "berth": "21",
+    "berthType": "Lower",
+    "trainName": "Demo Express",
+    "trainNumber": "12345"
+  },
+  {
+    "mobile": "9000000002",
+    "coach": "S4",
+    "berth": "22",
+    "berthType": "Middle",
+    "trainName": "Demo Express",
+    "trainNumber": "12345"
+  },
+  {
+    "mobile": "9000000003",
+    "coach": "S4",
+    "berth": "23",
+    "berthType": "Upper",
+    "trainName": "Demo Express",
+    "trainNumber": "12345"
+  },
+  {
+    "mobile": "9000000004",
+    "coach": "S4",
+    "berth": "24",
+    "berthType": "Lower",
+    "trainName": "Demo Express",
+    "trainNumber": "12345"
+  },
+  {
+    "mobile": "9000000005",
+    "coach": "S5",
+    "berth": "11",
+    "berthType": "Lower",
+    "trainName": "Demo Express",
+    "trainNumber": "12345"
+  },
+  {
+    "mobile": "9000000006",
+    "coach": "S5",
+    "berth": "12",
+    "berthType": "Middle",
+    "trainName": "Demo Express",
+    "trainNumber": "12345"
+  },
+  {
+    "mobile": "9000000007",
+    "coach": "B1",
+    "berth": "41",
+    "berthType": "Lower",
+    "trainName": "Demo Express",
+    "trainNumber": "12345"
+  },
+  {
+    "mobile": "9000000008",
+    "coach": "B1",
+    "berth": "42",
+    "berthType": "Middle",
+    "trainName": "Demo Express",
+    "trainNumber": "12345"
+  },
+  {
+    "mobile": "9000000009",
+    "coach": "B1",
+    "berth": "43",
+    "berthType": "Upper",
+    "trainName": "Demo Express",
+    "trainNumber": "12345"
+  }
+]

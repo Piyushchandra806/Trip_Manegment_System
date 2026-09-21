@@ -1,0 +1,44 @@
+[
+  {
+    "roomId": "R000001",
+    "hotelId": "H000001",
+    "floor": "3",
+    "roomNumber": "305",
+    "isDemo": true
+  },
+  {
+    "roomId": "R000002",
+    "hotelId": "H000002",
+    "floor": "5",
+    "roomNumber": "512",
+    "isDemo": true
+  },
+  {
+    "roomId": "R000003",
+    "hotelId": "H000001",
+    "floor": "3",
+    "roomNumber": "306",
+    "isDemo": true
+  },
+  {
+    "roomId": "R000004",
+    "hotelId": "H000002",
+    "floor": "5",
+    "roomNumber": "514",
+    "isDemo": true
+  },
+  {
+    "roomId": "R000005",
+    "hotelId": "H000001",
+    "floor": "3",
+    "roomNumber": "307",
+    "isDemo": true
+  },
+  {
+    "roomId": "R000006",
+    "hotelId": "H000002",
+    "floor": "5",
+    "roomNumber": "516",
+    "isDemo": true
+  }
+]
