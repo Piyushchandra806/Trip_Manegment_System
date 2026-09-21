@@ -26,8 +26,8 @@ export default function FamiliesList() {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ 
-        mobile: moveModal.passenger.mobile, 
-        newFamilyId: moveModal.newFamilyId 
+        passengerId: moveModal.passenger.passengerId, 
+        targetFamilyId: moveModal.newFamilyId 
       })
     });
     if (res.ok) {

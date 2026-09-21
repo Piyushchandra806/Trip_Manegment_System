@@ -7,16 +7,16 @@ export async function POST(request) {
     const admin = await getLoggedInAdmin(request);
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { targetMobile, targetFamilyId } = await request.json();
+    const { passengerId, targetFamilyId } = await request.json();
 
-    if (!targetMobile || !targetFamilyId) {
+    if (!passengerId || !targetFamilyId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     const { db } = await connectToDatabase();
 
     // Verify passenger belongs to admin
-    const passenger = await db.collection("passengers").findOne({ mobile: targetMobile, adminId: admin.adminId });
+    const passenger = await db.collection("passengers").findOne({ passengerId: passengerId, adminId: admin.adminId });
     if (!passenger) {
       return NextResponse.json({ error: "Passenger not found" }, { status: 404 });
     }
