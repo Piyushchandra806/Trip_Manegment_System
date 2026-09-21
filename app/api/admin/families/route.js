@@ -20,7 +20,7 @@ export async function GET(request) {
       return {
         ...f,
         memberCount: members.length,
-        members: members.map(m => m.name).join(", ")
+        members: members
       };
     });
 
