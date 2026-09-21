@@ -8,7 +8,7 @@ export async function GET(request, { params }) {
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { db } = await connectToDatabase();
-    const passenger = await db.collection("passengers").findOne({ mobile: params.mobile, adminId: admin.adminId });
+    const passenger = await db.collection("passengers").findOne({ mobile: (await params).mobile, adminId: admin.adminId });
     if (!passenger) {
       return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
     }
@@ -41,7 +41,7 @@ export async function PUT(request, { params }) {
     }
 
     const { db } = await connectToDatabase();
-    const passenger = await db.collection("passengers").findOne({ mobile: params.mobile, adminId: admin.adminId });
+    const passenger = await db.collection("passengers").findOne({ mobile: (await params).mobile, adminId: admin.adminId });
     if (!passenger) {
       return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
     }
@@ -102,7 +102,7 @@ export async function DELETE(request, { params }) {
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { db } = await connectToDatabase();
-    const passenger = await db.collection("passengers").findOne({ mobile: params.mobile, adminId: admin.adminId });
+    const passenger = await db.collection("passengers").findOne({ mobile: (await params).mobile, adminId: admin.adminId });
     if (!passenger) {
       return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
     }
