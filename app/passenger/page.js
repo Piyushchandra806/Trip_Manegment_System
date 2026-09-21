@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PassengerSearch from "@/components/PassengerSearch";
 import PassengerCard from "@/components/PassengerCard";
 import TrainDetails from "@/components/TrainDetails";
@@ -18,6 +18,15 @@ export default function PassengerPage() {
   const [errorMessage, setErrorMessage] = useState("");
   
   const [copySuccess, setCopySuccess] = useState(false);
+
+  useEffect(() => {
+    if (searchState === "found" && passenger) {
+      window.dispatchEvent(new CustomEvent('passengerFound', { detail: passenger }));
+    } else {
+      window.dispatchEvent(new CustomEvent('passengerFound', { detail: null }));
+    }
+  }, [searchState, passenger]);
+
 
   const handleSearch = async (mobile) => {
     setSearchState("loading");

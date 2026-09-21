@@ -1,16 +1,30 @@
 'use client';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export default function WhatsAppHelpButton() {
   const pathname = usePathname();
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
+  const [passenger, setPassenger] = useState(null);
+
+  useEffect(() => {
+    const handlePassengerFound = (e) => setPassenger(e.detail);
+    window.addEventListener('passengerFound', handlePassengerFound);
+    return () => window.removeEventListener('passengerFound', handlePassengerFound);
+  }, []);
 
   // Hide on admin routes or if not configured
   if (!whatsappNumber || (pathname && pathname.startsWith('/admin'))) {
     return null; 
   }
 
-  const message = encodeURIComponent('नमस्ते, मुझे अपनी यात्रा के विवरण के संबंध में सहायता चाहिए।');
+  let messageText = 'Hello, I need help regarding my trip details.';
+  if (passenger && passenger.mobile) {
+    const maskedMobile = `********${String(passenger.mobile).slice(-4)}`;
+    messageText += `\n\nName: ${passenger.name}\nMobile: ${maskedMobile}`;
+  }
+
+  const message = encodeURIComponent(messageText);
   const cleanNumber = whatsappNumber.replace(/\D/g, '');
   const url = `https://wa.me/${cleanNumber}?text=${message}`;
 
