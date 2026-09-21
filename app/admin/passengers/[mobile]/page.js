@@ -26,7 +26,7 @@ export default function PassengerDetail() {
           setPassenger(p);
           setDetailsForm({ name: p.name, mobile: p.mobile, familyName: p.familyName });
           if (p.train) {
-            setTrainForm({ coach: p.train.coach, berth: p.train.berth, berthType: p.train.berthType });
+            setTrainForm({ trainName: p.train.trainName || "", trainNumber: p.train.trainNumber || "", coachNumber: p.train.coach || "", berthNumber: p.train.berth || "", berthType: p.train.berthType || "" });
           }
         }
         setLoading(false);
@@ -184,14 +184,24 @@ export default function PassengerDetail() {
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
         <h2 className="text-xl font-bold text-slate-800 mb-4 border-b pb-2">🚆 Train Seat</h2>
         <form onSubmit={handleSaveTrain} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Train Name</label>
+              <input type="text" value={trainForm.trainName} onChange={e => setTrainForm({...trainForm, trainName: e.target.value})} className="mt-1 w-full px-3 py-2 border rounded-xl" required />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Train Number</label>
+              <input type="text" value={trainForm.trainNumber} onChange={e => setTrainForm({...trainForm, trainNumber: e.target.value})} className="mt-1 w-full px-3 py-2 border rounded-xl" />
+            </div>
+          </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700">Coach</label>
-              <input type="text" value={trainForm.coach} onChange={e => setTrainForm({...trainForm, coach: e.target.value})} className="mt-1 w-full px-3 py-2 border rounded-xl" required />
+              <input type="text" value={trainForm.coachNumber} onChange={e => setTrainForm({...trainForm, coachNumber: e.target.value})} className="mt-1 w-full px-3 py-2 border rounded-xl" required />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700">Berth</label>
-              <input type="text" value={trainForm.berth} onChange={e => setTrainForm({...trainForm, berth: e.target.value})} className="mt-1 w-full px-3 py-2 border rounded-xl" required />
+              <input type="text" value={trainForm.berthNumber} onChange={e => setTrainForm({...trainForm, berthNumber: e.target.value})} className="mt-1 w-full px-3 py-2 border rounded-xl" required />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700">Type</label>
