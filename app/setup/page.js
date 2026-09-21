@@ -3,6 +3,8 @@ import SetupForm from '@/components/SetupForm';
 import Link from 'next/link';
 import { Train } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default async function SetupPage() {
   const hasAdmins = await hasAnyAdmins();
   
