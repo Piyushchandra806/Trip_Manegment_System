@@ -1,37 +1,52 @@
-import { NextResponse } from 'next/server';
-import AdmZip from 'adm-zip';
-import path from 'path';
-import fs from 'fs';
-import { logActivity } from '@/lib/activity';
+import { NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongodb";
+import { getLoggedInAdmin } from "@/lib/adminAuth";
 
-export async function GET() {
+export async function GET(request) {
   try {
-    const dataDir = path.join(process.cwd(), 'data');
-    const zip = new AdmZip();
+    const admin = await getLoggedInAdmin(request);
+    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { db } = await connectToDatabase();
     
-    // Add all json files in dataDir
-    if (fs.existsSync(dataDir)) {
-      const files = fs.readdirSync(dataDir);
-      for (const file of files) {
-        if (file.endsWith('.json')) {
-          zip.addLocalFile(path.join(dataDir, file));
-        }
+    // Fetch all admin-scoped data
+    const passengers = await db.collection("passengers").find({ adminId: admin.adminId }).toArray();
+    const families = await db.collection("families").find({ adminId: admin.adminId }).toArray();
+    
+    const passengerIds = passengers.map(p => p.passengerId);
+    const trainAllocations = await db.collection("trainAllocations").find({ passengerId: { $in: passengerIds } }).toArray();
+    const hotelAllocations = await db.collection("hotelAllocations").find({ passengerId: { $in: passengerIds } }).toArray();
+    
+    // Global tables (for completeness)
+    const trains = await db.collection("trains").find({}).toArray();
+    const coaches = await db.collection("coaches").find({}).toArray();
+    const hotels = await db.collection("hotels").find({}).toArray();
+    const rooms = await db.collection("rooms").find({}).toArray();
+
+    const exportData = {
+      timestamp: new Date().toISOString(),
+      adminId: admin.adminId,
+      data: {
+        passengers,
+        families,
+        trainAllocations,
+        hotelAllocations,
+        trains,
+        coaches,
+        hotels,
+        rooms
       }
-    }
-    
-    const zipBuffer = zip.toBuffer();
+    };
 
-    await logActivity('Created Backup', 'Downloaded full system backup');
-
-    return new NextResponse(zipBuffer, {
+    return new NextResponse(JSON.stringify(exportData, null, 2), {
       status: 200,
       headers: {
-        'Content-Type': 'application/zip',
-        'Content-Disposition': `attachment; filename="trip-backup-${new Date().toISOString().split('T')[0]}.zip"`,
-      },
+        "Content-Type": "application/json",
+        "Content-Disposition": `attachment; filename="trip-management-backup-${new Date().toISOString().split("T")[0]}.json"`
+      }
     });
-  } catch (error) {
-    console.error('Backup error:', error);
-    return NextResponse.json({ error: 'Failed to create backup' }, { status: 500 });
+  } catch (err) {
+    console.error("Backup error:", err);
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
 }

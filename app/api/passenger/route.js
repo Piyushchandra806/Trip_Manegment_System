@@ -48,7 +48,7 @@ export async function GET(request) {
   }
 
   try {
-    const details = getCompleteTripDetails(mobile);
+    const details = await getCompleteTripDetails(mobile);
 
     if (!details) {
       return NextResponse.json({ error: 'Passenger not found' }, { status: 404 });

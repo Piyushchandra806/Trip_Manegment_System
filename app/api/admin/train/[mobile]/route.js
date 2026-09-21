@@ -1,59 +1,123 @@
-import { NextResponse } from 'next/server';
-import { readJson, writeJson } from '@/lib/data';
-import { generateId } from '@/lib/idUtils';
-import { getTrains } from '@/lib/tripData';
+import { NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongodb";
+import { getLoggedInAdmin } from "@/lib/adminAuth";
 
-export async function PUT(request, context) {
-  const params = await context.params;
-  const { mobile } = params;
-  const { coach, berth, berthType } = await request.json();
+export async function GET(request, { params }) {
+  try {
+    const admin = await getLoggedInAdmin(request);
+    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const passengers = await readJson('passengers.json');
-  const passenger = passengers.find(p => p.mobile === mobile);
-  if (!passenger) {
-    return NextResponse.json({ success: false, error: 'Passenger not found' }, { status: 404 });
-  }
+    const { db } = await connectToDatabase();
+    const passenger = await db.collection("passengers").findOne({ mobile: params.mobile, adminId: admin.adminId });
+    if (!passenger) {
+      return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
+    }
 
-  const trains = await readJson('trains.json');
-  const coaches = await readJson('coaches.json');
-  const trainAllocations = await readJson('train_allocations.json');
+    const alloc = await db.collection("trainAllocations").findOne({ passengerId: passenger.passengerId });
+    if (!alloc) return NextResponse.json(null);
 
-  let trainName = "Demo Express";
-  let trainNumber = "12345";
-  
-  let train = trains.find(t => t.trainName === trainName && t.trainNumber === trainNumber);
-  if (!train) {
-    train = { trainId: generateId('T', trains, 'trainId'), trainName, trainNumber };
-    trains.push(train);
-    await writeJson('trains.json', trains);
-  }
-
-  let coachObj = coaches.find(c => c.trainId === train.trainId && c.coachNumber === coach);
-  if (!coachObj) {
-    coachObj = { coachId: generateId('C', coaches, 'coachId'), trainId: train.trainId, coachNumber: coach, coachType: "Sleeper" };
-    coaches.push(coachObj);
-    await writeJson('coaches.json', coaches);
-  }
-
-  const allocIndex = trainAllocations.findIndex(a => a.passengerId === passenger.passengerId);
-  if (allocIndex !== -1) {
-    trainAllocations[allocIndex].trainId = train.trainId;
-    trainAllocations[allocIndex].coachId = coachObj.coachId;
-    trainAllocations[allocIndex].coachNumber = coach;
-    trainAllocations[allocIndex].berthNumber = berth;
-    trainAllocations[allocIndex].berthType = berthType;
-  } else {
-    trainAllocations.push({
-      allocationId: generateId('A', trainAllocations, 'allocationId'),
-      passengerId: passenger.passengerId,
-      trainId: train.trainId,
-      coachId: coachObj.coachId,
-      coachNumber: coach,
-      berthNumber: berth,
-      berthType: berthType
+    const train = await db.collection("trains").findOne({ trainId: alloc.trainId });
+    return NextResponse.json({
+      trainName: train ? train.trainName : "",
+      trainNumber: train ? train.trainNumber : "",
+      coachNumber: alloc.coachNumber,
+      berthNumber: alloc.berthNumber,
+      berthType: alloc.berthType
     });
+  } catch (err) {
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
+}
 
-  await writeJson('train_allocations.json', trainAllocations);
-  return NextResponse.json({ success: true });
+export async function PUT(request, { params }) {
+  try {
+    const admin = await getLoggedInAdmin(request);
+    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { trainName, trainNumber, coachNumber, berthNumber, berthType } = await request.json();
+
+    if (!trainName || !coachNumber || !berthNumber) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    const { db } = await connectToDatabase();
+    const passenger = await db.collection("passengers").findOne({ mobile: params.mobile, adminId: admin.adminId });
+    if (!passenger) {
+      return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
+    }
+
+    // Upsert Train
+    let train = await db.collection("trains").findOne({ trainName, trainNumber: trainNumber || "" });
+    if (!train) {
+      const count = await db.collection("trains").countDocuments();
+      train = { trainId: `T${String(count+1).padStart(6, "0")}`, trainName, trainNumber: trainNumber || "", createdAt: new Date().toISOString() };
+      await db.collection("trains").insertOne(train);
+    }
+
+    // Upsert Coach
+    let coach = await db.collection("coaches").findOne({ trainId: train.trainId, coachNumber });
+    if (!coach) {
+      const count = await db.collection("coaches").countDocuments();
+      coach = { coachId: `C${String(count+1).padStart(6, "0")}`, trainId: train.trainId, coachNumber, coachType: "", createdAt: new Date().toISOString() };
+      await db.collection("coaches").insertOne(coach);
+    }
+
+    const existingAlloc = await db.collection("trainAllocations").findOne({ passengerId: passenger.passengerId });
+    if (existingAlloc) {
+      await db.collection("trainAllocations").updateOne(
+        { passengerId: passenger.passengerId },
+        { $set: { trainId: train.trainId, coachId: coach.coachId, coachNumber, berthNumber, berthType, updatedAt: new Date().toISOString() } }
+      );
+    } else {
+      const count = await db.collection("trainAllocations").countDocuments();
+      await db.collection("trainAllocations").insertOne({
+        allocationId: `TA${String(count+1).padStart(6, "0")}`,
+        passengerId: passenger.passengerId,
+        trainId: train.trainId,
+        coachId: coach.coachId,
+        coachNumber,
+        berthNumber,
+        berthType,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+    }
+
+    await db.collection("activityLogs").insertOne({
+      action: "Train allocation updated",
+      adminId: admin.adminId,
+      details: `Updated train allocation for passenger ${passenger.passengerId}`,
+      createdAt: new Date().toISOString()
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request, { params }) {
+  try {
+    const admin = await getLoggedInAdmin(request);
+    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { db } = await connectToDatabase();
+    const passenger = await db.collection("passengers").findOne({ mobile: params.mobile, adminId: admin.adminId });
+    if (!passenger) {
+      return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
+    }
+
+    await db.collection("trainAllocations").deleteOne({ passengerId: passenger.passengerId });
+
+    await db.collection("activityLogs").insertOne({
+      action: "Train allocation deleted",
+      adminId: admin.adminId,
+      details: `Deleted train allocation for passenger ${passenger.passengerId}`,
+      createdAt: new Date().toISOString()
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
+  }
 }

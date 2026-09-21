@@ -1,73 +1,79 @@
-import { NextResponse } from 'next/server';
-import { readJson, writeJson } from '@/lib/data';
-import { generateId } from '@/lib/idUtils';
+import { NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongodb";
+import { getLoggedInAdmin } from "@/lib/adminAuth";
 
-async function resolveHotelAndRoom(hotelName, floor, room) {
-  const hotels = await readJson('hotels.json');
-  const rooms = await readJson('rooms.json');
-  
-  let hotelObj = hotels.find(h => h.hotelName === hotelName);
-  if (!hotelObj) {
-    hotelObj = { hotelId: generateId('H', hotels, 'hotelId'), hotelName };
-    hotels.push(hotelObj);
-    await writeJson('hotels.json', hotels);
+export async function PUT(request, { params }) {
+  try {
+    const admin = await getLoggedInAdmin(request);
+    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { date, hotelName, roomNumber, floor } = await request.json();
+    const day = parseInt(params.day, 10);
+
+    const { db } = await connectToDatabase();
+    const passenger = await db.collection("passengers").findOne({ mobile: params.mobile, adminId: admin.adminId });
+    if (!passenger) {
+      return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
+    }
+
+    // Upsert Hotel
+    let hotel = await db.collection("hotels").findOne({ hotelName });
+    if (!hotel) {
+      const count = await db.collection("hotels").countDocuments();
+      hotel = { hotelId: `H${String(count+1).padStart(6, "0")}`, hotelName, createdAt: new Date().toISOString() };
+      await db.collection("hotels").insertOne(hotel);
+    }
+
+    // Upsert Room
+    let room = await db.collection("rooms").findOne({ hotelId: hotel.hotelId, roomNumber });
+    if (!room) {
+      const count = await db.collection("rooms").countDocuments();
+      room = { roomId: `R${String(count+1).padStart(6, "0")}`, hotelId: hotel.hotelId, roomNumber, floor: floor || "", createdAt: new Date().toISOString() };
+      await db.collection("rooms").insertOne(room);
+    }
+
+    await db.collection("hotelAllocations").updateOne(
+      { passengerId: passenger.passengerId, day },
+      { $set: { hotelId: hotel.hotelId, roomId: room.roomId, date, updatedAt: new Date().toISOString() } }
+    );
+
+    await db.collection("activityLogs").insertOne({
+      action: "Hotel allocation updated",
+      adminId: admin.adminId,
+      details: `Updated hotel allocation for passenger ${passenger.passengerId} on day ${day}`,
+      createdAt: new Date().toISOString()
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
-
-  let roomObj = rooms.find(r => r.hotelId === hotelObj.hotelId && r.floor === floor.toString() && r.roomNumber === room.toString());
-  if (!roomObj) {
-    roomObj = { roomId: generateId('R', rooms, 'roomId'), hotelId: hotelObj.hotelId, floor: floor.toString(), roomNumber: room.toString() };
-    rooms.push(roomObj);
-    await writeJson('rooms.json', rooms);
-  }
-
-  return { hotelId: hotelObj.hotelId, roomId: roomObj.roomId };
 }
 
-export async function PUT(request, context) {
-  const params = await context.params;
-  const { mobile, day } = params;
-  const { hotelName, floor, room } = await request.json();
+export async function DELETE(request, { params }) {
+  try {
+    const admin = await getLoggedInAdmin(request);
+    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const passengers = await readJson('passengers.json');
-  const passenger = passengers.find(p => p.mobile === mobile);
-  if (!passenger) {
-    return NextResponse.json({ success: false, error: 'Passenger not found' }, { status: 404 });
+    const day = parseInt(params.day, 10);
+
+    const { db } = await connectToDatabase();
+    const passenger = await db.collection("passengers").findOne({ mobile: params.mobile, adminId: admin.adminId });
+    if (!passenger) {
+      return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
+    }
+
+    await db.collection("hotelAllocations").deleteOne({ passengerId: passenger.passengerId, day });
+
+    await db.collection("activityLogs").insertOne({
+      action: "Hotel allocation deleted",
+      adminId: admin.adminId,
+      details: `Deleted hotel allocation for passenger ${passenger.passengerId} on day ${day}`,
+      createdAt: new Date().toISOString()
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
-
-  const { hotelId, roomId } = await resolveHotelAndRoom(hotelName, floor, room);
-
-  const hotelAllocations = await readJson('hotel_allocations.json');
-  const index = hotelAllocations.findIndex(ha => ha.passengerId === passenger.passengerId && ha.day === day.toString());
-  
-  if (index === -1) {
-    return NextResponse.json({ success: false, error: 'Hotel stay not found' }, { status: 404 });
-  }
-
-  hotelAllocations[index].hotelId = hotelId;
-  hotelAllocations[index].roomId = roomId;
-
-  await writeJson('hotel_allocations.json', hotelAllocations);
-  return NextResponse.json({ success: true });
-}
-
-export async function DELETE(request, context) {
-  const params = await context.params;
-  const { mobile, day } = params;
-
-  const passengers = await readJson('passengers.json');
-  const passenger = passengers.find(p => p.mobile === mobile);
-  if (!passenger) {
-    return NextResponse.json({ success: false, error: 'Passenger not found' }, { status: 404 });
-  }
-
-  let hotelAllocations = await readJson('hotel_allocations.json');
-  const initialLength = hotelAllocations.length;
-  hotelAllocations = hotelAllocations.filter(ha => !(ha.passengerId === passenger.passengerId && ha.day === day.toString()));
-  
-  if (hotelAllocations.length === initialLength) {
-    return NextResponse.json({ success: false, error: 'Hotel stay not found' }, { status: 404 });
-  }
-
-  await writeJson('hotel_allocations.json', hotelAllocations);
-  return NextResponse.json({ success: true });
 }

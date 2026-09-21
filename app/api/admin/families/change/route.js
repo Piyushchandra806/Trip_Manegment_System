@@ -1,18 +1,47 @@
-import { NextResponse } from 'next/server';
-import { readJson, writeJson } from '@/lib/data';
+import { NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongodb";
+import { getLoggedInAdmin } from "@/lib/adminAuth";
 
-export async function PUT(request) {
-  const { mobile, newFamilyId, newFamilyName } = await request.json();
+export async function POST(request) {
+  try {
+    const admin = await getLoggedInAdmin(request);
+    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const passengers = await readJson('passengers.json');
-  const index = passengers.findIndex(p => p.mobile === mobile);
-  
-  if (index === -1) {
-    return NextResponse.json({ success: false, error: 'Passenger not found' }, { status: 404 });
+    const { targetMobile, targetFamilyId } = await request.json();
+
+    if (!targetMobile || !targetFamilyId) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    const { db } = await connectToDatabase();
+
+    // Verify passenger belongs to admin
+    const passenger = await db.collection("passengers").findOne({ mobile: targetMobile, adminId: admin.adminId });
+    if (!passenger) {
+      return NextResponse.json({ error: "Passenger not found" }, { status: 404 });
+    }
+
+    // Verify target family belongs to admin
+    const family = await db.collection("families").findOne({ familyId: targetFamilyId, adminId: admin.adminId });
+    if (!family) {
+      return NextResponse.json({ error: "Family not found" }, { status: 404 });
+    }
+
+    // Assign passenger to new family
+    await db.collection("passengers").updateOne(
+      { passengerId: passenger.passengerId },
+      { $set: { familyId: targetFamilyId, updatedAt: new Date().toISOString() } }
+    );
+
+    await db.collection("activityLogs").insertOne({
+      action: "Family assignment changed",
+      adminId: admin.adminId,
+      details: `Passenger ${passenger.passengerId} moved to family ${targetFamilyId}`,
+      createdAt: new Date().toISOString()
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
-
-  passengers[index].familyId = newFamilyId;
-  await writeJson('passengers.json', passengers);
-  
-  return NextResponse.json({ success: true });
 }

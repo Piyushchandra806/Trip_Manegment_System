@@ -1,72 +1,34 @@
-import { NextResponse } from 'next/server';
-import { readJson } from '@/lib/data';
+import { NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongodb";
+import { getLoggedInAdmin } from "@/lib/adminAuth";
 
-export async function GET() {
-  const hotelAllocations = await readJson('hotel_allocations.json');
-  const hotels = await readJson('hotels.json');
-  const rooms = await readJson('rooms.json');
-  const passengers = await readJson('passengers.json');
-  const families = await readJson('families.json');
-  
-  const familiesMap = {};
-  for (const f of families) {
-    familiesMap[f.familyId] = f.familyName;
-  }
-  
-  const passengersMap = {};
-  for (const p of passengers) {
-    passengersMap[p.passengerId] = {
-      ...p,
-      familyName: familiesMap[p.familyId] || 'Unknown'
-    };
-  }
-  
-  const hotelsMap = {};
-  for (const h of hotels) {
-    hotelsMap[h.hotelId] = {
-      name: h.hotelName,
-      assignedRooms: 0,
-      rooms: []
-    };
-  }
+export async function GET(request) {
+  try {
+    const admin = await getLoggedInAdmin(request);
+    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  // Group passengers by room
-  const roomGroups = {}; // key: roomId, value: { room: roomObj, passengers: [] }
-  
-  for (const a of hotelAllocations) {
-    const hotel = hotelsMap[a.hotelId];
-    if (!hotel) continue;
+    const { db } = await connectToDatabase();
     
-    if (!roomGroups[a.roomId]) {
-       const room = rooms.find(r => r.roomId === a.roomId);
-       if (!room) continue;
-       roomGroups[a.roomId] = { room, passengers: [] };
-    }
-    
-    const passenger = passengersMap[a.passengerId];
-    if (passenger && !roomGroups[a.roomId].passengers.find(p => p.passengerId === passenger.passengerId)) {
-       roomGroups[a.roomId].passengers.push(passenger);
-    }
-  }
-  
-  // Build final array
-  for (const [roomId, data] of Object.entries(roomGroups)) {
-     const hotel = hotelsMap[data.room.hotelId];
-     if (hotel) {
-       hotel.assignedRooms += 1;
-       hotel.rooms.push({
-         roomId: data.room.roomId,
-         floor: data.room.floor,
-         room: data.room.roomNumber,
-         passengers: data.passengers
-       });
-     }
-  }
+    const passengers = await db.collection("passengers").find({ adminId: admin.adminId }).toArray();
+    const pIds = passengers.map(p => p.passengerId);
 
-  // Sort rooms
-  for (const h of Object.values(hotelsMap)) {
-    h.rooms.sort((a, b) => parseInt(a.room) - parseInt(b.room));
-  }
+    const allocs = await db.collection("hotelAllocations").find({ passengerId: { $in: pIds } }).toArray();
+    const hotels = await db.collection("hotels").find({}).toArray();
 
-  return NextResponse.json(Object.values(hotelsMap));
+    // Calculate occupied rooms per hotel based ONLY on this admin"s passengers
+    const stats = hotels.map(h => {
+      const hotelAllocs = allocs.filter(a => a.hotelId === h.hotelId);
+      // Group by room to find unique rooms occupied
+      const uniqueRooms = new Set(hotelAllocs.map(a => a.roomId)).size;
+      return {
+        hotelName: h.hotelName,
+        occupiedRooms: uniqueRooms,
+        totalGuests: new Set(hotelAllocs.map(a => a.passengerId)).size
+      };
+    });
+
+    return NextResponse.json(stats);
+  } catch (err) {
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
+  }
 }

@@ -1,56 +1,98 @@
-import { NextResponse } from 'next/server';
-import { readJson, writeJson } from '@/lib/data';
-import { generateId } from '@/lib/idUtils';
+import { NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongodb";
+import { getLoggedInAdmin } from "@/lib/adminAuth";
 
-async function resolveHotelAndRoom(hotelName, floor, room) {
-  const hotels = await readJson('hotels.json');
-  const rooms = await readJson('rooms.json');
-  
-  let hotelObj = hotels.find(h => h.hotelName === hotelName);
-  if (!hotelObj) {
-    hotelObj = { hotelId: generateId('H', hotels, 'hotelId'), hotelName };
-    hotels.push(hotelObj);
-    await writeJson('hotels.json', hotels);
+export async function GET(request, { params }) {
+  try {
+    const admin = await getLoggedInAdmin(request);
+    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { db } = await connectToDatabase();
+    const passenger = await db.collection("passengers").findOne({ mobile: params.mobile, adminId: admin.adminId });
+    
+    if (!passenger) {
+      return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
+    }
+
+    const allocs = await db.collection("hotelAllocations").find({ passengerId: passenger.passengerId }).toArray();
+    const hotels = await db.collection("hotels").find({}).toArray();
+    const rooms = await db.collection("rooms").find({}).toArray();
+
+    const response = allocs.map(a => {
+      const h = hotels.find(h => h.hotelId === a.hotelId);
+      const r = rooms.find(r => r.roomId === a.roomId);
+      return {
+        hotelAllocationId: a.hotelAllocationId,
+        day: a.day,
+        date: a.date,
+        hotelName: h ? h.hotelName : "",
+        roomNumber: r ? r.roomNumber : "",
+        floor: r ? r.floor : ""
+      };
+    });
+
+    return NextResponse.json(response.sort((a, b) => a.day - b.day));
+  } catch (err) {
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
-
-  let roomObj = rooms.find(r => r.hotelId === hotelObj.hotelId && r.floor === floor.toString() && r.roomNumber === room.toString());
-  if (!roomObj) {
-    roomObj = { roomId: generateId('R', rooms, 'roomId'), hotelId: hotelObj.hotelId, floor: floor.toString(), roomNumber: room.toString() };
-    rooms.push(roomObj);
-    await writeJson('rooms.json', rooms);
-  }
-
-  return { hotelId: hotelObj.hotelId, roomId: roomObj.roomId };
 }
 
-export async function POST(request, context) {
-  const params = await context.params;
-  const { mobile } = params;
-  const { day, date, hotelName, floor, room } = await request.json();
+export async function POST(request, { params }) {
+  try {
+    const admin = await getLoggedInAdmin(request);
+    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const passengers = await readJson('passengers.json');
-  const passenger = passengers.find(p => p.mobile === mobile);
-  if (!passenger) {
-    return NextResponse.json({ success: false, error: 'Passenger not found' }, { status: 404 });
+    const { day, date, hotelName, roomNumber, floor } = await request.json();
+
+    if (!day || !date || !hotelName || !roomNumber) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    const { db } = await connectToDatabase();
+    const passenger = await db.collection("passengers").findOne({ mobile: params.mobile, adminId: admin.adminId });
+    if (!passenger) {
+      return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
+    }
+
+    // Upsert Hotel
+    let hotel = await db.collection("hotels").findOne({ hotelName });
+    if (!hotel) {
+      const count = await db.collection("hotels").countDocuments();
+      hotel = { hotelId: `H${String(count+1).padStart(6, "0")}`, hotelName, createdAt: new Date().toISOString() };
+      await db.collection("hotels").insertOne(hotel);
+    }
+
+    // Upsert Room (Not globally unique, scoped to hotel)
+    let room = await db.collection("rooms").findOne({ hotelId: hotel.hotelId, roomNumber });
+    if (!room) {
+      const count = await db.collection("rooms").countDocuments();
+      room = { roomId: `R${String(count+1).padStart(6, "0")}`, hotelId: hotel.hotelId, roomNumber, floor: floor || "", createdAt: new Date().toISOString() };
+      await db.collection("rooms").insertOne(room);
+    }
+
+    const allocCount = await db.collection("hotelAllocations").countDocuments();
+    const alloc = {
+      hotelAllocationId: `HA${String(allocCount+1).padStart(6, "0")}`,
+      passengerId: passenger.passengerId,
+      hotelId: hotel.hotelId,
+      roomId: room.roomId,
+      day: parseInt(day, 10),
+      date,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    await db.collection("hotelAllocations").insertOne(alloc);
+
+    await db.collection("activityLogs").insertOne({
+      action: "Hotel allocated",
+      adminId: admin.adminId,
+      details: `Allocated hotel to passenger ${passenger.passengerId} for day ${day}`,
+      createdAt: new Date().toISOString()
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
-
-  const { hotelId, roomId } = await resolveHotelAndRoom(hotelName, floor, room);
-
-  const hotelAllocations = await readJson('hotel_allocations.json');
-  const exists = hotelAllocations.some(ha => ha.passengerId === passenger.passengerId && ha.day === day.toString());
-  if (exists) {
-    return NextResponse.json({ success: false, error: 'Stay for this day already exists' }, { status: 400 });
-  }
-
-  hotelAllocations.push({
-    hotelAllocationId: generateId('HA', hotelAllocations, 'hotelAllocationId'),
-    passengerId: passenger.passengerId,
-    hotelId,
-    roomId,
-    day: day.toString(),
-    date: date || ""
-  });
-
-  await writeJson('hotel_allocations.json', hotelAllocations);
-  return NextResponse.json({ success: true });
 }

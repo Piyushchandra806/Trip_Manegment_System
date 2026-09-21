@@ -1,114 +1,107 @@
-import { NextResponse } from 'next/server';
-import { readJson, writeJson } from '@/lib/data';
-import { generateId } from '@/lib/idUtils';
-import { logActivity } from '@/lib/activity';
+import { NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongodb";
+import { getLoggedInAdmin } from "@/lib/adminAuth";
 
-export async function PUT(request, context) {
+export async function GET(request, { params }) {
   try {
-    const params = await context.params;
-    const { mobile } = params;
-    const { name, newMobile, familyName, aadhaarNumber } = await request.json();
+    const admin = await getLoggedInAdmin(request);
+    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    if (!mobile || !name || !familyName) {
-      return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
-    }
-
-    if (name.length > 100 || familyName.length > 100 || (newMobile && newMobile.length > 15)) {
-      return NextResponse.json({ success: false, error: 'Input too long' }, { status: 400 });
-    }
-
-    const passengers = await readJson('passengers.json');
-    const index = passengers.findIndex(p => p.mobile === mobile);
+    const { db } = await connectToDatabase();
     
-    if (index === -1) {
-      return NextResponse.json({ success: false, error: 'Passenger not found' }, { status: 404 });
+    // Admin scoping
+    const passenger = await db.collection("passengers").findOne({ mobile: params.mobile, adminId: admin.adminId });
+    if (!passenger) {
+      return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
     }
 
-    // Check for duplicate mobile
-    if (newMobile && newMobile !== mobile) {
-      const isDuplicate = passengers.some(p => p.mobile === newMobile);
-      if (isDuplicate) {
-        return NextResponse.json({ 
-          success: false, 
-          error: `⚠ Duplicate Mobile Number\n\n${newMobile} is already assigned to another passenger.\n\nPlease check the passenger information.`
-        }, { status: 409 });
-      }
+    let familyName = "Unknown";
+    if (passenger.familyId) {
+      const family = await db.collection("families").findOne({ familyId: passenger.familyId });
+      if (family) familyName = family.familyName;
     }
 
-    // Handle Family
-    const families = await readJson('families.json');
-    let family = families.find(f => f.familyName === familyName);
-    if (!family) {
-      family = {
-        familyId: generateId('F', families, 'familyId'),
-        familyName
-      };
-      families.push(family);
-      await writeJson('families.json', families);
-    }
-
-    
-    // Update passenger details
-    passengers[index].name = name;
-    passengers[index].familyId = family.familyId;
-    
-    if (aadhaarNumber) {
-      const cleanedAadhaar = String(aadhaarNumber).replace(/\s+/g, '');
-      if (/^\d{12}$/.test(cleanedAadhaar)) {
-        passengers[index].aadhaarNumber = cleanedAadhaar;
-      } else {
-        return NextResponse.json({ success: false, error: 'Aadhaar must be exactly 12 digits.' }, { status: 400 });
-      }
-    } else {
-      passengers[index].aadhaarNumber = null;
-    }
-
-    
-    if (newMobile && newMobile !== mobile) {
-      passengers[index].mobile = newMobile;
-    }
-    
-    await writeJson('passengers.json', passengers);
-    await logActivity('Edited Passenger', `Updated details for ${name} (${newMobile || mobile})`);
-
-    return NextResponse.json({ success: true });
+    // Mask Aadhaar for Admin UI (as requested, or maybe they need to edit it? Assuming they can edit but we mask it for GET)
+    // Wait, if they need to edit, we should send the real one. The prompt says "Prefer displaying XXXX XXXX 9012 instead of full number".
+    // I will send the real one so the edit form works, the frontend can mask it in the table.
+    // Actually the prompt says "Prefer displaying XXXX XXXX 9012... Never put Aadhaar in URLs, Public APIs. Admin side: Only authenticated admins can access Aadhaar."
+    // Since this is an admin API and they might need to edit it, we return the real one here.
+    return NextResponse.json({ ...passenger, familyName });
   } catch (error) {
-    return NextResponse.json({ success: false, error: 'We couldn\'t complete this operation. Please try again.' }, { status: 500 });
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
 }
 
-export async function DELETE(request, context) {
+export async function PUT(request, { params }) {
   try {
-    const params = await context.params;
-    const { mobile } = params;
+    const admin = await getLoggedInAdmin(request);
+    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const passengers = await readJson('passengers.json');
-    const index = passengers.findIndex(p => p.mobile === mobile);
-    
-    if (index === -1) {
-      return NextResponse.json({ success: false, error: 'Passenger not found' }, { status: 404 });
+    const body = await request.json();
+    const { name, aadhaarNumber, mobile: newMobile } = body;
+
+    if (!name || !newMobile) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const passenger = passengers[index];
+    const { db } = await connectToDatabase();
+    
+    const passenger = await db.collection("passengers").findOne({ mobile: params.mobile, adminId: admin.adminId });
+    if (!passenger) {
+      return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
+    }
 
-    // Remove from passengers
-    passengers.splice(index, 1);
-    await writeJson('passengers.json', passengers);
+    // If mobile changed, check if new mobile exists
+    if (params.mobile !== newMobile) {
+      const existing = await db.collection("passengers").findOne({ mobile: newMobile });
+      if (existing) {
+        return NextResponse.json({ error: "New mobile number already exists" }, { status: 400 });
+      }
+    }
 
-    // Remove train allocation
-    const trainAlloc = await readJson('train_allocations.json');
-    const newTrainAlloc = trainAlloc.filter(a => a.passengerId !== passenger.passengerId);
-    await writeJson('train_allocations.json', newTrainAlloc);
+    await db.collection("passengers").updateOne(
+      { passengerId: passenger.passengerId },
+      { $set: { name, mobile: newMobile, aadhaarNumber, updatedAt: new Date().toISOString() } }
+    );
 
-    // Remove hotel allocation
-    const hotelAlloc = await readJson('hotel_allocations.json');
-    const newHotelAlloc = hotelAlloc.filter(a => a.passengerId !== passenger.passengerId);
-    await writeJson('hotel_allocations.json', newHotelAlloc);
-
-    await logActivity('Deleted Passenger', `Removed ${passenger.name} (${passenger.mobile}) and their allocations`);
+    await db.collection("activityLogs").insertOne({
+      action: "Passenger edited",
+      adminId: admin.adminId,
+      details: `Edited passenger ${passenger.passengerId}`,
+      createdAt: new Date().toISOString()
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ success: false, error: 'We couldn\'t complete this operation. Please try again.' }, { status: 500 });
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request, { params }) {
+  try {
+    const admin = await getLoggedInAdmin(request);
+    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { db } = await connectToDatabase();
+    const passenger = await db.collection("passengers").findOne({ mobile: params.mobile, adminId: admin.adminId });
+    
+    if (!passenger) {
+      return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
+    }
+
+    await db.collection("passengers").deleteOne({ passengerId: passenger.passengerId });
+    await db.collection("trainAllocations").deleteMany({ passengerId: passenger.passengerId });
+    await db.collection("hotelAllocations").deleteMany({ passengerId: passenger.passengerId });
+
+    await db.collection("activityLogs").insertOne({
+      action: "Passenger deleted",
+      adminId: admin.adminId,
+      details: `Deleted passenger ${passenger.passengerId}`,
+      createdAt: new Date().toISOString()
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
 }

@@ -1,12 +1,12 @@
-import { readJson } from '@/lib/data';
+import { hasAnyAdmins } from '@/lib/adminAuth';
 import SetupForm from '@/components/SetupForm';
 import Link from 'next/link';
 import { Train } from 'lucide-react';
 
 export default async function SetupPage() {
-  const admins = await readJson('admins.json');
+  const hasAdmins = await hasAnyAdmins();
   
-  if (admins.length > 0) {
+  if (hasAdmins) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">

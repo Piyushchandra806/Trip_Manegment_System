@@ -1,55 +1,61 @@
-import { NextResponse } from 'next/server';
-import AdmZip from 'adm-zip';
-import path from 'path';
-import fs from 'fs';
-import { logActivity } from '@/lib/activity';
+import { NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongodb";
+import { getLoggedInAdmin } from "@/lib/adminAuth";
 
 export async function POST(request) {
   try {
-    const formData = await request.formData();
-    const file = formData.get('file');
+    const admin = await getLoggedInAdmin(request);
+    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    if (!file) {
-      return NextResponse.json({ error: 'No backup file provided' }, { status: 400 });
+    const { backupData } = await request.json();
+    if (!backupData || !backupData.data) {
+      return NextResponse.json({ error: "Invalid backup format" }, { status: 400 });
     }
 
-    const dataDir = path.join(process.cwd(), 'data');
-    const backupsDir = path.join(dataDir, 'backups');
+    const { db } = await connectToDatabase();
+    const { passengers, families, trainAllocations, hotelAllocations } = backupData.data;
+
+    // Delete existing admin-scoped data
+    await db.collection("passengers").deleteMany({ adminId: admin.adminId });
+    await db.collection("families").deleteMany({ adminId: admin.adminId });
     
-    // Ensure backups dir exists
-    if (!fs.existsSync(backupsDir)) {
-      fs.mkdirSync(backupsDir, { recursive: true });
+    const passengerIds = passengers.map(p => p.passengerId);
+    if (passengerIds.length > 0) {
+      await db.collection("trainAllocations").deleteMany({ passengerId: { $in: passengerIds } });
+      await db.collection("hotelAllocations").deleteMany({ passengerId: { $in: passengerIds } });
     }
 
-    // 1. Create an auto-backup of current state BEFORE restoring
-    const currentZip = new AdmZip();
-    const files = fs.readdirSync(dataDir);
-    for (const f of files) {
-      if (f.endsWith('.json')) {
-        currentZip.addLocalFile(path.join(dataDir, f));
-      }
+    // Insert new data (making sure adminId is correct)
+    if (families && families.length > 0) {
+      const fixedFamilies = families.map(f => { delete f._id; f.adminId = admin.adminId; return f; });
+      await db.collection("families").insertMany(fixedFamilies);
     }
-    currentZip.writeZip(path.join(backupsDir, `auto-backup-before-restore-${Date.now()}.zip`));
-
-    // 2. Extract uploaded ZIP
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const uploadZip = new AdmZip(buffer);
-    const zipEntries = uploadZip.getEntries();
     
-    // Only extract .json files directly into dataDir to avoid overwriting unrelated files
-    for (const entry of zipEntries) {
-      if (!entry.isDirectory && entry.entryName.endsWith('.json') && !entry.entryName.includes('/')) {
-        // Read content and write it
-        const content = uploadZip.readAsText(entry);
-        fs.writeFileSync(path.join(dataDir, entry.entryName), content, 'utf8');
-      }
+    if (passengers && passengers.length > 0) {
+      const fixedPassengers = passengers.map(p => { delete p._id; p.adminId = admin.adminId; return p; });
+      await db.collection("passengers").insertMany(fixedPassengers);
     }
 
-    await logActivity('Restored Backup', `Restored from file: ${file.name}`);
+    if (trainAllocations && trainAllocations.length > 0) {
+      const fixedTA = trainAllocations.map(ta => { delete ta._id; return ta; });
+      await db.collection("trainAllocations").insertMany(fixedTA);
+    }
+
+    if (hotelAllocations && hotelAllocations.length > 0) {
+      const fixedHA = hotelAllocations.map(ha => { delete ha._id; return ha; });
+      await db.collection("hotelAllocations").insertMany(fixedHA);
+    }
+
+    await db.collection("activityLogs").insertOne({
+      action: "Restore Data",
+      adminId: admin.adminId,
+      details: "Restored data from backup",
+      createdAt: new Date().toISOString()
+    });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Restore error:', error);
-    return NextResponse.json({ error: 'We couldn\'t complete the restore operation. Please try again.' }, { status: 500 });
+  } catch (err) {
+    console.error("Restore error:", err);
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
 }

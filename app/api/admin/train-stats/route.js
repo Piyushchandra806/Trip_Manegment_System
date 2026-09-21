@@ -1,53 +1,32 @@
-import { NextResponse } from 'next/server';
-import { readJson } from '@/lib/data';
+import { NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongodb";
+import { getLoggedInAdmin } from "@/lib/adminAuth";
 
-export async function GET() {
-  const trainAllocations = await readJson('train_allocations.json');
-  const coaches = await readJson('coaches.json');
-  const passengers = await readJson('passengers.json');
-  const families = await readJson('families.json');
-  
-  const familiesMap = {};
-  for (const f of families) {
-    familiesMap[f.familyId] = f.familyName;
-  }
-  
-  const passengersMap = {};
-  for (const p of passengers) {
-    passengersMap[p.passengerId] = {
-      ...p,
-      familyName: familiesMap[p.familyId] || 'Unknown'
-    };
-  }
+export async function GET(request) {
+  try {
+    const admin = await getLoggedInAdmin(request);
+    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  // Map to hold coach data
-  const coachesMap = {};
-  for (const c of coaches) {
-    coachesMap[c.coachId] = {
-      coach: c.coachNumber,
-      passengers: []
-    };
-  }
-  
-  for (const a of trainAllocations) {
-    if (coachesMap[a.coachId]) {
-      const p = passengersMap[a.passengerId];
-      if (p) {
-        coachesMap[a.coachId].passengers.push({
-          ...p,
-          berth: a.berthNumber,
-          berthType: a.berthType
-        });
-      }
-    }
-  }
+    const { db } = await connectToDatabase();
+    
+    const passengers = await db.collection("passengers").find({ adminId: admin.adminId }).toArray();
+    const pIds = passengers.map(p => p.passengerId);
 
-  const coachList = Object.values(coachesMap).sort((a, b) => a.coach.localeCompare(b.coach));
+    const allocs = await db.collection("trainAllocations").find({ passengerId: { $in: pIds } }).toArray();
+    const trains = await db.collection("trains").find({}).toArray();
 
-  // Sort passengers in each coach by berth number
-  for (const c of coachList) {
-    c.passengers.sort((a, b) => parseInt(a.berth) - parseInt(b.berth));
+    const stats = trains.map(t => {
+      const trainAllocs = allocs.filter(a => a.trainId === t.trainId);
+      return {
+        trainName: t.trainName,
+        trainNumber: t.trainNumber,
+        totalPassengers: trainAllocs.length
+      };
+    });
+
+    // Only return trains that actually have passengers for this admin
+    return NextResponse.json(stats.filter(s => s.totalPassengers > 0));
+  } catch (err) {
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
-
-  return NextResponse.json(coachList);
 }

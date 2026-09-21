@@ -1,48 +1,37 @@
-import { NextResponse } from 'next/server';
-import { readJson } from '@/lib/data';
-import { getPassengers, getTrains, getHotels } from '@/lib/tripData';
+import { NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongodb";
+import { getLoggedInAdmin } from "@/lib/adminAuth";
 
-export async function GET() {
-  const basePassengers = getPassengers();
-  const trains = getTrains();
-  const hotels = getHotels();
+export async function GET(request) {
+  try {
+    const admin = await getLoggedInAdmin(request);
+    if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const passengers = basePassengers.map(p => ({
-    ...p,
-    train: trains.find(t => t.mobile === p.mobile) || null,
-    hotels: hotels.filter(h => h.mobile === p.mobile) || []
-  }));
-
-  const families = await readJson('families.json');
-  
-  const totalPassengers = passengers.length;
-  const totalFamilies = families.length;
-  
-  let assignedSeats = 0;
-  let assignedRooms = 0;
-  
-  let missingTrainCount = 0;
-  let missingHotelCount = 0;
-  let missingFamilyCount = 0;
-  
-  for (const p of passengers) {
-    if (p.train) assignedSeats++;
-    else missingTrainCount++;
+    const { db } = await connectToDatabase();
     
-    if (p.hotels && p.hotels.length > 0) assignedRooms++;
-    else missingHotelCount++;
+    const passengerCount = await db.collection("passengers").countDocuments({ adminId: admin.adminId });
+    const familyCount = await db.collection("families").countDocuments({ adminId: admin.adminId });
     
-    // No family string in data is usually 'Unknown', but let's check F000000
-    if (!p.familyId || p.familyId === 'F000000') missingFamilyCount++;
+    // Find all passenger IDs for this admin to scope allocations
+    const passengers = await db.collection("passengers").find({ adminId: admin.adminId }, { projection: { passengerId: 1 } }).toArray();
+    const pIds = passengers.map(p => p.passengerId);
+
+    const trainAllocCount = await db.collection("trainAllocations").countDocuments({ passengerId: { $in: pIds } });
+    const hotelAllocCount = await db.collection("hotelAllocations").countDocuments({ passengerId: { $in: pIds } });
+
+    // Missing info (e.g. no train or no hotel)
+    const missingTrain = passengerCount - trainAllocCount;
+    // (Hotel logic is complex if they need multiple days, we will just provide basic stats here)
+    const missingHotel = passengerCount - await db.collection("hotelAllocations").distinct("passengerId", { passengerId: { $in: pIds } }).then(ids => ids.length);
+
+    return NextResponse.json({
+      totalPassengers: passengerCount,
+      totalFamilies: familyCount,
+      passengersWithTrain: trainAllocCount,
+      passengersWithHotel: passengerCount - missingHotel,
+      missingInfo: missingTrain + missingHotel
+    });
+  } catch (err) {
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
-  
-  return NextResponse.json({
-    totalPassengers,
-    totalFamilies,
-    assignedSeats,
-    assignedRooms,
-    missingTrainCount,
-    missingHotelCount,
-    missingFamilyCount
-  });
 }
