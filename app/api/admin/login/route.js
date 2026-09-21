@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createSession } from '@/lib/auth';
-import { readJson } from '@/lib/data';
-import { verifyPassword } from '@/lib/crypto';
+import { getAdminByUsername, verifyAdminPassword } from '@/lib/adminAuth';
 
 export async function POST(request) {
   try {
@@ -11,10 +10,10 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Invalid credentials' }, { status: 401 });
     }
 
-    const admins = await readJson('admins.json');
-    const admin = admins.find(a => a.username.toLowerCase() === username.toLowerCase());
+    // Centralized admin fetch and verification
+    const admin = await getAdminByUsername(username);
 
-    if (admin && verifyPassword(password, admin.passwordHash)) {
+    if (admin && verifyAdminPassword(password, admin.passwordHash)) {
       const token = await createSession({ admin: true, username: admin.username, adminId: admin.adminId });
       
       const response = NextResponse.json({ success: true });
@@ -29,6 +28,7 @@ export async function POST(request) {
       return response;
     }
 
+    // Security: Do not reveal whether username or password was incorrect
     return NextResponse.json({ success: false, error: 'Invalid credentials' }, { status: 401 });
   } catch (error) {
     console.error('Login error:', error);
