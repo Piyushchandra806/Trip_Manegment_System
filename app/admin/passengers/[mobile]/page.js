@@ -146,6 +146,31 @@ export default function PassengerDetail() {
             <label className="block text-sm font-medium text-slate-700">Mobile Number</label>
             <input type="text" value={detailsForm.mobile} onChange={e => setDetailsForm({...detailsForm, mobile: e.target.value})} className="mt-1 w-full px-3 py-2 border rounded-xl" required />
           </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Father/Husband Name</label>
+              <input type="text" value={detailsForm.relativeName} onChange={e => setDetailsForm({...detailsForm, relativeName: e.target.value})} className="mt-1 w-full px-3 py-2 border rounded-xl" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Age</label>
+              <input type="number" value={detailsForm.age} onChange={e => setDetailsForm({...detailsForm, age: e.target.value})} className="mt-1 w-full px-3 py-2 border rounded-xl" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Address</label>
+              <input type="text" value={detailsForm.address} onChange={e => setDetailsForm({...detailsForm, address: e.target.value})} className="mt-1 w-full px-3 py-2 border rounded-xl" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Gender</label>
+              <select value={detailsForm.gender} onChange={e => setDetailsForm({...detailsForm, gender: e.target.value})} className="mt-1 w-full px-3 py-2 border rounded-xl bg-white">
+                <option value="">Select Gender</option>
+                <option value="M">Male (पु)</option>
+                <option value="F">Female (म)</option>
+              </select>
+            </div>
+          </div>
           <div>
             <label className="block text-sm font-medium text-slate-700">Family</label>
             <input type="text" value={detailsForm.familyName} onChange={e => setDetailsForm({...detailsForm, familyName: e.target.value})} className="mt-1 w-full px-3 py-2 border rounded-xl" required />

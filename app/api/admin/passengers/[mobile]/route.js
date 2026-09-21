@@ -38,7 +38,7 @@ export async function PUT(request, { params }) {
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await request.json();
-    const { name, aadhaarNumber, mobile: newMobile } = body;
+    const { name, aadhaarNumber, mobile: newMobile, relativeName, age, address, gender } = body;
 
     if (!name || !newMobile) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -61,7 +61,7 @@ export async function PUT(request, { params }) {
 
     await db.collection("passengers").updateOne(
       { passengerId: passenger.passengerId },
-      { $set: { name, mobile: newMobile, aadhaarNumber, updatedAt: new Date().toISOString() } }
+      { $set: { name, mobile: newMobile, aadhaarNumber, relativeName, age, address, gender, updatedAt: new Date().toISOString() } }
     );
 
     await db.collection("activityLogs").insertOne({
