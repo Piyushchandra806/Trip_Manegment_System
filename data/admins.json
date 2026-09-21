@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "adminId": "AD000001",
+    "username": "Admin",
+    "passwordHash": "f95e2672a2908235e9094f8123c0fe0f:76a7e6660bf2154953153b2352736d06e7431c10f2e0c45df52958cbbec68dd578fe2ddce84ba004044aae2e7ac683b0a909dcedc45e5e21021415ac1b2df646",
+    "createdAt": "2026-09-21T14:13:29.310Z"
+  }
+]
