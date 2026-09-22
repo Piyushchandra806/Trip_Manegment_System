@@ -3,9 +3,9 @@
  *
  * Props:
  *  - members: Array of { name, mobile, familyName, train: { coach, berth, berthType } }
- *  - currentPassengerId: string - the searched passenger's mobile
+ *  - currentPassengerName: string - the searched passenger's mobile
  */
-export default function FamilyMembers({ members, currentPassengerId }) {
+export default function FamilyMembers({ members, currentPassengerName }) {
   if (!members || members.length === 0) return null;
 
   // Determine if all members have the same coach
@@ -25,7 +25,7 @@ export default function FamilyMembers({ members, currentPassengerId }) {
 
         <ul className="space-y-3">
           {members.map((member) => {
-            const isCurrent = member.mobile === currentPassengerId;
+            const isCurrent = member.mobile === currentPassengerName;
             return (
               <li
                 key={member.mobile}
@@ -70,7 +70,7 @@ export default function FamilyMembers({ members, currentPassengerId }) {
             <div
               key={member.mobile}
               className={`border rounded-xl p-4 transition-colors ${
-                member.mobile === currentPassengerId
+                member.mobile === currentPassengerName
                   ? "border-blue-200 bg-blue-50/50"
                   : "border-slate-200 bg-slate-50"
               }`}

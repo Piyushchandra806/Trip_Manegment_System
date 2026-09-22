@@ -7,6 +7,7 @@ import TrainDetails from "@/components/TrainDetails";
 import FamilyMembers from "@/components/FamilyMembers";
 import HotelDetails from "@/components/HotelDetails";
 import { Share2, Copy, CheckCircle2 } from 'lucide-react';
+import SharePreviewModal from "@/components/SharePreviewModal";
 
 /**
  * Passenger search page.
@@ -18,6 +19,7 @@ export default function PassengerPage() {
   const [errorMessage, setErrorMessage] = useState("");
   
   const [copySuccess, setCopySuccess] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   useEffect(() => {
     if (searchState === "found" && passenger) {
@@ -95,22 +97,8 @@ export default function PassengerPage() {
     return text.trim();
   };
 
-  const handleShare = async () => {
-    const text = generateShareText();
-    
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'My Trip Details',
-          text: text
-        });
-      } catch (err) {
-        // User cancelled or share failed
-        
-      }
-    } else {
-      handleCopy(text);
-    }
+  const handleShare = () => {
+    setIsShareModalOpen(true);
   };
 
   const handleCopy = (textToCopy = generateShareText()) => {
@@ -169,14 +157,12 @@ export default function PassengerPage() {
                 {copySuccess ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                 {copySuccess ? 'Copied!' : 'Copy Details'}
               </button>
-              {typeof navigator !== 'undefined' && navigator.share && (
-                <button
+              <button
                   onClick={handleShare}
                   className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
                 >
                   <Share2 className="w-4 h-4" /> Share My Details
                 </button>
-              )}
             </div>
           </div>
 
@@ -191,7 +177,7 @@ export default function PassengerPage() {
             <div className="lg:col-span-7 space-y-4 lg:space-y-6">
               <FamilyMembers
                 members={familyMembers}
-                currentPassengerId={passenger.mobile}
+                currentPassengerName={passenger.name}
               />
               <HotelDetails hotels={passenger.hotels} familyMembers={familyMembers} />
             </div>
@@ -215,6 +201,13 @@ export default function PassengerPage() {
           </button>
         </div>
       )}
+      <SharePreviewModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        passenger={passenger}
+        familyMembers={familyMembers}
+      />
+
     </div>
   );
 }

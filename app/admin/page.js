@@ -192,8 +192,8 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100">
-                  {activities.map(act => (
-                    <div key={act.id} className="p-4 flex gap-4 hover:bg-slate-50 transition-colors">
+                  {activities.map((act, index) => (
+                    <div key={act.id || act._id || index} className="p-4 flex gap-4 hover:bg-slate-50 transition-colors">
                       <div className="mt-1">
                          <CheckCircle2 className="w-5 h-5 text-green-500" />
                       </div>

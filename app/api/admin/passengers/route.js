@@ -18,9 +18,11 @@ export async function GET(request) {
     const trains = await db.collection("trains").find({}).toArray();
     const hotels = await db.collection("hotels").find({}).toArray();
     const rooms = await db.collection("rooms").find({}).toArray();
+    const adminsList = await db.collection("admins").find({}).toArray();
 
     const enriched = passengers.map(p => {
       const fam = families.find(f => f.familyId === p.familyId);
+      const adminObj = adminsList.find(a => a.adminId === p.adminId);
       
       const ta = trainAllocations.find(a => a.passengerId === p.passengerId);
       let trainInfo = null;
@@ -56,6 +58,7 @@ export async function GET(request) {
         ...p,
         aadhaarNumber: maskedAadhaar,
         familyName: fam ? fam.familyName : "Unknown",
+        adminName: adminObj ? adminObj.username : "All",
         train: trainInfo,
         hotels: hotelsInfo
       };

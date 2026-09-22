@@ -4,6 +4,21 @@ import Link from 'next/link';
 import { exportToCSV } from '@/lib/exportUtils';
 import { Printer, Download, Search } from 'lucide-react';
 
+const ADMIN_OPTIONS = [
+  'All',
+  'प्रितम चन्द्रा',
+  'शीला चन्द्रा',
+  'महेन्द्र चन्द्रा',
+  'हरनारायण पाण्डेय',
+  'सालिक / मयंक',
+  'कैलाश / भागवत साहू / मितेश / तोपनारायण',
+  'जीवन साहू',
+  'जितेन्द्र',
+  'पप्पू / कीर्तन',
+  'भागवत चन्द्रा',
+  'बोधराम चन्द्रा'
+];
+
 export default function PassengersList() {
   const [passengers, setPassengers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,6 +26,7 @@ export default function PassengersList() {
   const [search, setSearch] = useState('');
   const [coachFilter, setCoachFilter] = useState('All');
   const [hotelFilter, setHotelFilter] = useState('All');
+  const [adminFilter, setAdminFilter] = useState('All');
   const [missingOnly, setMissingOnly] = useState(false);
   
   const [sortField, setSortField] = useState('name');
@@ -56,6 +72,7 @@ export default function PassengersList() {
       // Dropdown filters
       if (coachFilter !== 'All' && p.coach !== coachFilter) return false;
       if (hotelFilter !== 'All' && p.hotel !== hotelFilter) return false;
+      if (adminFilter !== 'All' && p.adminName !== adminFilter) return false;
 
       // Unified search
       if (search) {
@@ -78,7 +95,7 @@ export default function PassengersList() {
       if (valA > valB) return sortAsc ? 1 : -1;
       return 0;
     });
-  }, [passengers, search, coachFilter, hotelFilter, missingOnly, sortField, sortAsc]);
+  }, [passengers, search, coachFilter, hotelFilter, adminFilter, missingOnly, sortField, sortAsc]);
 
   const handleExport = () => {
     const exportData = filteredData.map(p => ({
@@ -143,6 +160,12 @@ export default function PassengersList() {
             <span className="font-medium text-slate-600">Hotel:</span>
             <select className="border rounded-md px-2 py-1 bg-white outline-none" value={hotelFilter} onChange={e => setHotelFilter(e.target.value)}>
               {hotels.map(h => <option key={h} value={h}>{h}</option>)}
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-slate-600">Admin:</span>
+            <select className="border rounded-md px-2 py-1 bg-white outline-none" value={adminFilter} onChange={e => setAdminFilter(e.target.value)}>
+              {ADMIN_OPTIONS.map(a => <option key={a} value={a}>{a}</option>)}
             </select>
           </div>
           <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-600">
