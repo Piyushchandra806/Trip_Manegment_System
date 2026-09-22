@@ -53,6 +53,7 @@ export default function PassengerPage() {
       
       setPassenger({
         ...data.passenger,
+        fullMobile: mobile,
         train: data.train,
         hotels: data.hotels
       });
