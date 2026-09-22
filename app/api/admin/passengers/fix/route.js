@@ -20,7 +20,7 @@ export async function POST(request) {
     for (const update of updates) {
       const { oldMobile, name, mobile, aadhaarNumber } = update;
       // Only allow updating passengers belonging to this admin
-      const passenger = await db.collection("passengers").findOne({ mobile: oldMobile, adminId: admin.adminId });
+      const passenger = await db.collection("passengers").findOne({ mobile: oldMobile });
       if (passenger) {
         await db.collection("passengers").updateOne(
           { passengerId: passenger.passengerId },
@@ -32,7 +32,7 @@ export async function POST(request) {
 
     await db.collection("activityLogs").insertOne({
       action: "Bulk Passenger edited",
-      adminId: admin.adminId,
+      
       details: `Bulk edited ${count} passengers`,
       createdAt: new Date().toISOString()
     });

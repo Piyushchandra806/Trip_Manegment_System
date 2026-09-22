@@ -11,7 +11,7 @@ export async function PUT(request, { params }) {
     const day = parseInt((await params).day, 10);
 
     const { db } = await connectToDatabase();
-    const passenger = await db.collection("passengers").findOne({ passengerId: (await params).id, adminId: admin.adminId });
+    const passenger = await db.collection("passengers").findOne({ passengerId: (await params).id });
     if (!passenger) {
       return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
     }
@@ -39,7 +39,7 @@ export async function PUT(request, { params }) {
 
     await db.collection("activityLogs").insertOne({
       action: "Hotel allocation updated",
-      adminId: admin.adminId,
+      
       details: `Updated hotel allocation for passenger ${passenger.passengerId} on day ${day}`,
       createdAt: new Date().toISOString()
     });
@@ -58,7 +58,7 @@ export async function DELETE(request, { params }) {
     const day = parseInt((await params).day, 10);
 
     const { db } = await connectToDatabase();
-    const passenger = await db.collection("passengers").findOne({ passengerId: (await params).id, adminId: admin.adminId });
+    const passenger = await db.collection("passengers").findOne({ passengerId: (await params).id });
     if (!passenger) {
       return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
     }
@@ -67,7 +67,7 @@ export async function DELETE(request, { params }) {
 
     await db.collection("activityLogs").insertOne({
       action: "Hotel allocation deleted",
-      adminId: admin.adminId,
+      
       details: `Deleted hotel allocation for passenger ${passenger.passengerId} on day ${day}`,
       createdAt: new Date().toISOString()
     });

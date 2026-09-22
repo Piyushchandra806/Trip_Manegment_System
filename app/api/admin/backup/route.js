@@ -10,8 +10,8 @@ export async function GET(request) {
     const { db } = await connectToDatabase();
     
     // Fetch all admin-scoped data
-    const passengers = await db.collection("passengers").find({ adminId: admin.adminId }).toArray();
-    const families = await db.collection("families").find({ adminId: admin.adminId }).toArray();
+    const passengers = await db.collection("passengers").find({}).toArray();
+    const families = await db.collection("families").find({}).toArray();
     
     const passengerIds = passengers.map(p => p.passengerId);
     const trainAllocations = await db.collection("trainAllocations").find({ passengerId: { $in: passengerIds } }).toArray();
@@ -25,7 +25,7 @@ export async function GET(request) {
 
     const exportData = {
       timestamp: new Date().toISOString(),
-      adminId: admin.adminId,
+      
       data: {
         passengers,
         families,

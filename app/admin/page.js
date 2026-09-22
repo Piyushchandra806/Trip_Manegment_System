@@ -12,8 +12,22 @@ export default function AdminDashboard() {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    fetch('/api/admin/stats').then(r => r.json()).then(setStats);
-    fetch('/api/admin/activities').then(r => r.json()).then(setActivities);
+    fetch('/api/admin/stats').then(r => {
+      if (r.status === 401) {
+        window.location.href = '/admin/login';
+      }
+      return r.json();
+    }).then(data => {
+      if (!data.error) setStats(data);
+    });
+
+    fetch('/api/admin/activities').then(r => r.json()).then(data => {
+      if (Array.isArray(data)) {
+        setActivities(data);
+      } else {
+        setActivities([]);
+      }
+    });
   }, []);
 
   const handleRestoreSubmit = async () => {

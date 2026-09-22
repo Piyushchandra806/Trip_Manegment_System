@@ -9,12 +9,12 @@ export async function GET(request) {
 
     const { db } = await connectToDatabase();
     
-    const passengerCount = await db.collection("passengers").countDocuments({ adminId: admin.adminId });
-    const familyCount = await db.collection("families").countDocuments({ adminId: admin.adminId });
+    const passengerCount = await db.collection("passengers").countDocuments({});
+    const familyCount = await db.collection("families").countDocuments({});
     
     // Use aggregation to count train allocations without pulling all passenger IDs into Node.js
     const trainResult = await db.collection("passengers").aggregate([
-      { $match: { adminId: admin.adminId } },
+      { $match: {} },
       { $lookup: { from: "trainAllocations", localField: "passengerId", foreignField: "passengerId", as: "trains" } },
       { $match: { "trains.0": { $exists: true } } },
       { $count: "count" }
@@ -23,7 +23,7 @@ export async function GET(request) {
 
     // Use aggregation to count unique passengers with hotel allocations
     const hotelResult = await db.collection("passengers").aggregate([
-      { $match: { adminId: admin.adminId } },
+      { $match: {} },
       { $lookup: { from: "hotelAllocations", localField: "passengerId", foreignField: "passengerId", as: "hotels" } },
       { $match: { "hotels.0": { $exists: true } } },
       { $count: "count" }

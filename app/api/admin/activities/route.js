@@ -9,7 +9,7 @@ export async function GET(request) {
     const admin = await getLoggedInAdmin(request);
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const activities = await getRecentActivity(20, admin.adminId);
+    const activities = await getRecentActivity(20);
     return NextResponse.json(activities);
   } catch (error) {
     return NextResponse.json({ error: "Server Error" }, { status: 500 });

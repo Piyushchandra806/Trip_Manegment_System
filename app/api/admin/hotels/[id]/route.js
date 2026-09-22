@@ -8,7 +8,7 @@ export async function GET(request, { params }) {
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { db } = await connectToDatabase();
-    const passenger = await db.collection("passengers").findOne({ passengerId: (await params).id, adminId: admin.adminId });
+    const passenger = await db.collection("passengers").findOne({ passengerId: (await params).id });
     
     if (!passenger) {
       return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
@@ -49,7 +49,7 @@ export async function POST(request, { params }) {
     }
 
     const { db } = await connectToDatabase();
-    const passenger = await db.collection("passengers").findOne({ passengerId: (await params).id, adminId: admin.adminId });
+    const passenger = await db.collection("passengers").findOne({ passengerId: (await params).id });
     if (!passenger) {
       return NextResponse.json({ error: "Passenger not found or access denied" }, { status: 404 });
     }
@@ -86,7 +86,7 @@ export async function POST(request, { params }) {
 
     await db.collection("activityLogs").insertOne({
       action: "Hotel allocated",
-      adminId: admin.adminId,
+      
       details: `Allocated hotel to passenger ${passenger.passengerId} for day ${day}`,
       createdAt: new Date().toISOString()
     });

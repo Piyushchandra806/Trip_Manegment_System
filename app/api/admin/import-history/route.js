@@ -11,7 +11,7 @@ export async function GET(request) {
     
     // Sort by timestamp descending, limit to 10
     const history = await db.collection("importHistory")
-      .find({ adminId: admin.adminId })
+      .find({})
       .sort({ timestamp: -1 })
       .limit(10)
       .toArray();

@@ -16,8 +16,8 @@ export async function POST(request) {
     const { passengers, families, trainAllocations, hotelAllocations } = backupData.data;
 
     // Delete existing admin-scoped data
-    await db.collection("passengers").deleteMany({ adminId: admin.adminId });
-    await db.collection("families").deleteMany({ adminId: admin.adminId });
+    await db.collection("passengers").deleteMany({});
+    await db.collection("families").deleteMany({});
     
     const passengerIds = passengers.map(p => p.passengerId);
     if (passengerIds.length > 0) {
@@ -27,12 +27,12 @@ export async function POST(request) {
 
     // Insert new data (making sure adminId is correct)
     if (families && families.length > 0) {
-      const fixedFamilies = families.map(f => { delete f._id; f.adminId = admin.adminId; return f; });
+      const fixedFamilies = families.map(f => { delete f._id;  return f; });
       await db.collection("families").insertMany(fixedFamilies);
     }
     
     if (passengers && passengers.length > 0) {
-      const fixedPassengers = passengers.map(p => { delete p._id; p.adminId = admin.adminId; return p; });
+      const fixedPassengers = passengers.map(p => { delete p._id;  return p; });
       await db.collection("passengers").insertMany(fixedPassengers);
     }
 
@@ -48,7 +48,7 @@ export async function POST(request) {
 
     await db.collection("activityLogs").insertOne({
       action: "Restore Data",
-      adminId: admin.adminId,
+      
       details: "Restored data from backup",
       createdAt: new Date().toISOString()
     });

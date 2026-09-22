@@ -1,0 +1,268 @@
+[
+  {
+    "_id": "6ab18101abfe49e976e90540",
+    "familyId": "FAM_STRICT_1790017793809_0",
+    "familyName": "चन्द्रा Family (साहेब)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:53.809Z"
+  },
+  {
+    "_id": "6ab18102abfe49e976e90541",
+    "familyId": "FAM_STRICT_1790017794156_1",
+    "familyName": "चन्द्रा Family (गंगा)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:54.156Z"
+  },
+  {
+    "_id": "6ab18102abfe49e976e90542",
+    "familyId": "FAM_STRICT_1790017794230_2",
+    "familyName": "प्रसाद Family (हरिहर)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:54.230Z"
+  },
+  {
+    "_id": "6ab18102abfe49e976e90543",
+    "familyId": "FAM_STRICT_1790017794339_3",
+    "familyName": "पटेल Family (हीरालाल)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:54.340Z"
+  },
+  {
+    "_id": "6ab18102abfe49e976e90544",
+    "familyId": "FAM_STRICT_1790017794459_4",
+    "familyName": "चन्द्रा Family (धनंजय)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:54.459Z"
+  },
+  {
+    "_id": "6ab18102abfe49e976e90545",
+    "familyId": "FAM_STRICT_1790017794573_5",
+    "familyName": "पटेल Family (दिनेश)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:54.573Z"
+  },
+  {
+    "_id": "6ab18102abfe49e976e90546",
+    "familyId": "FAM_STRICT_1790017794912_6",
+    "familyName": "चन्द्रा Family (बोधराम)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:54.912Z"
+  },
+  {
+    "_id": "6ab18103abfe49e976e90547",
+    "familyId": "FAM_STRICT_1790017795017_7",
+    "familyName": "चन्द्रा Family (बलभद्र)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:55.017Z"
+  },
+  {
+    "_id": "6ab18103abfe49e976e90548",
+    "familyId": "FAM_STRICT_1790017795257_8",
+    "familyName": "चन्द्रा Family (सरिता)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:55.257Z"
+  },
+  {
+    "_id": "6ab18103abfe49e976e90549",
+    "familyId": "FAM_STRICT_1790017795368_9",
+    "familyName": "चन्द्रा Family (सागर)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:55.368Z"
+  },
+  {
+    "_id": "6ab18103abfe49e976e9054a",
+    "familyId": "FAM_STRICT_1790017795485_10",
+    "familyName": "साहू Family (भागवत)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:55.485Z"
+  },
+  {
+    "_id": "6ab18103abfe49e976e9054b",
+    "familyId": "FAM_STRICT_1790017795596_11",
+    "familyName": "सिदार Family (अजीत)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:55.596Z"
+  },
+  {
+    "_id": "6ab18103abfe49e976e9054c",
+    "familyId": "FAM_STRICT_1790017795814_12",
+    "familyName": "जायसवाल Family (पूर्णिमा)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:55.814Z"
+  },
+  {
+    "_id": "6ab18103abfe49e976e9054d",
+    "familyId": "FAM_STRICT_1790017795927_13",
+    "familyName": "चन्द्रा Family (बसंत)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:55.927Z"
+  },
+  {
+    "_id": "6ab18104abfe49e976e9054e",
+    "familyId": "FAM_STRICT_1790017796001_14",
+    "familyName": "चन्द्रा Family (देवकुमारी)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:56.001Z"
+  },
+  {
+    "_id": "6ab18104abfe49e976e9054f",
+    "familyId": "FAM_STRICT_1790017796116_15",
+    "familyName": "चन्द्रा Family (शीलू)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:56.116Z"
+  },
+  {
+    "_id": "6ab18104abfe49e976e90550",
+    "familyId": "FAM_STRICT_1790017796252_16",
+    "familyName": "चन्द्रा Family (ज्योति)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:56.252Z"
+  },
+  {
+    "_id": "6ab18104abfe49e976e90551",
+    "familyId": "FAM_STRICT_1790017796330_17",
+    "familyName": "चन्द्रा Family (आशुतोष)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:56.330Z"
+  },
+  {
+    "_id": "6ab18104abfe49e976e90552",
+    "familyId": "FAM_STRICT_1790017796459_18",
+    "familyName": "शर्मा Family (हेमलता)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:56.459Z"
+  },
+  {
+    "_id": "6ab18104abfe49e976e90553",
+    "familyId": "FAM_STRICT_1790017796539_19",
+    "familyName": "चन्द्रा Family (डिम्पल)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:56.539Z"
+  },
+  {
+    "_id": "6ab18104abfe49e976e90554",
+    "familyId": "FAM_STRICT_1790017796623_20",
+    "familyName": "चन्द्रा Family (लक्ष्मीन)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:56.623Z"
+  },
+  {
+    "_id": "6ab18104abfe49e976e90555",
+    "familyId": "FAM_STRICT_1790017796783_21",
+    "familyName": "शर्मा Family (रजनी)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:56.783Z"
+  },
+  {
+    "_id": "6ab18104abfe49e976e90556",
+    "familyId": "FAM_STRICT_1790017796865_22",
+    "familyName": "जायसवाल Family (कमला)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:56.865Z"
+  },
+  {
+    "_id": "6ab18104abfe49e976e90557",
+    "familyId": "FAM_STRICT_1790017796991_23",
+    "familyName": "जायसवाल Family (निशा)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:56.991Z"
+  },
+  {
+    "_id": "6ab18105abfe49e976e90558",
+    "familyId": "FAM_STRICT_1790017797107_24",
+    "familyName": "राठौर Family (प्रमिला)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:57.108Z"
+  },
+  {
+    "_id": "6ab18105abfe49e976e90559",
+    "familyId": "FAM_STRICT_1790017797302_25",
+    "familyName": "राठौर Family (शारदा)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:57.302Z"
+  },
+  {
+    "_id": "6ab18105abfe49e976e9055a",
+    "familyId": "FAM_STRICT_1790017797416_26",
+    "familyName": "राठौर Family (चन्द्रकला)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:57.416Z"
+  },
+  {
+    "_id": "6ab18105abfe49e976e9055b",
+    "familyId": "FAM_STRICT_1790017797491_27",
+    "familyName": "राठौर Family (निर्मला)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:57.491Z"
+  },
+  {
+    "_id": "6ab18105abfe49e976e9055c",
+    "familyId": "FAM_STRICT_1790017797569_28",
+    "familyName": "साहू Family (गोपाल)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:57.569Z"
+  },
+  {
+    "_id": "6ab18105abfe49e976e9055d",
+    "familyId": "FAM_STRICT_1790017797733_29",
+    "familyName": "ठाकुर Family (गोपी)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:57.733Z"
+  },
+  {
+    "_id": "6ab18106abfe49e976e9055e",
+    "familyId": "FAM_STRICT_1790017798159_30",
+    "familyName": "साहू Family (सुशीला)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:58.159Z"
+  },
+  {
+    "_id": "6ab18106abfe49e976e9055f",
+    "familyId": "FAM_STRICT_1790017798556_31",
+    "familyName": "चन्द्राकर Family (अमृत)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:58.556Z"
+  },
+  {
+    "_id": "6ab18106abfe49e976e90560",
+    "familyId": "FAM_STRICT_1790017798714_32",
+    "familyName": "मिश्रा Family (दयाशंकर)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:58.714Z"
+  },
+  {
+    "_id": "6ab18106abfe49e976e90561",
+    "familyId": "FAM_STRICT_1790017798875_33",
+    "familyName": "राठौर Family (भुनेश्वर)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:58.875Z"
+  },
+  {
+    "_id": "6ab18106abfe49e976e90562",
+    "familyId": "FAM_STRICT_1790017798984_34",
+    "familyName": "राठौर Family (भुनेश्वर)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:58.984Z"
+  },
+  {
+    "_id": "6ab18107abfe49e976e90563",
+    "familyId": "FAM_STRICT_1790017799060_35",
+    "familyName": "राठौर Family (भुनेश्वर)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:59.060Z"
+  },
+  {
+    "_id": "6ab18107abfe49e976e90564",
+    "familyId": "FAM_STRICT_1790017799160_36",
+    "familyName": "राठौर Family (भुनेश्वर)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:59.160Z"
+  },
+  {
+    "_id": "6ab18107abfe49e976e90565",
+    "familyId": "FAM_STRICT_1790017799234_37",
+    "familyName": "राठौर Family (भुनेश्वर)",
+    "adminId": "AD000001",
+    "createdAt": "2026-09-21T19:09:59.234Z"
+  }
+]

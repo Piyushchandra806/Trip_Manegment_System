@@ -172,7 +172,7 @@ export default function PassengersList() {
                   Name {sortField === 'name' && (sortAsc ? '↑' : '↓')}
                 </th>
                 <th className="p-4 font-bold text-slate-700">Age</th>
-                <th className="p-4 font-bold text-slate-700">Sex</th>
+                <th className="p-4 font-bold text-slate-700">Gender</th>
                 <th className="p-4 font-bold text-slate-700">Rel. Name</th>
                 <th className="p-4 font-bold text-slate-700">Address</th>
                 <th className="p-4 font-bold text-slate-700">Mobile</th>
@@ -191,7 +191,7 @@ export default function PassengersList() {
             </thead>
             <tbody className="text-sm">
               {filteredData.map(p => (
-                <tr key={p.mobile} className="border-b border-slate-100 hover:bg-slate-50 print:border-slate-300">
+                <tr key={p.passengerId} className="border-b border-slate-100 hover:bg-slate-50 print:border-slate-300">
                   <td className="p-4 font-medium text-slate-800">{p.name}</td>
                   <td className="p-4 text-slate-600">{p.age || '-'}</td>
                   <td className="p-4 text-slate-600">{p.gender || '-'}</td>

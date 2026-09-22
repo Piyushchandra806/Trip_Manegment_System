@@ -10,10 +10,10 @@ export async function GET(request) {
     const { db } = await connectToDatabase();
     
     // Only return families assigned to this admin
-    const rawFamilies = await db.collection("families").find({ adminId: admin.adminId }).toArray();
+    const rawFamilies = await db.collection("families").find({}).toArray();
     
     // To count members, we just query passengers for this admin
-    const passengers = await db.collection("passengers").find({ adminId: admin.adminId }).toArray();
+    const passengers = await db.collection("passengers").find({}).toArray();
 
     const families = rawFamilies.map(f => {
       const members = passengers.filter(p => p.familyId === f.familyId);

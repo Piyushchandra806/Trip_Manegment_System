@@ -9,10 +9,10 @@ export async function GET(request) {
 
     const { db } = await connectToDatabase();
     
-    const passengers = await db.collection("passengers").find({ adminId: admin.adminId }).toArray();
+    const passengers = await db.collection("passengers").find({}).toArray();
     const passengerIds = passengers.map(p => p.passengerId);
     
-    const families = await db.collection("families").find({ adminId: admin.adminId }).toArray();
+    const families = await db.collection("families").find({}).toArray();
     const trainAllocations = await db.collection("trainAllocations").find({ passengerId: { $in: passengerIds } }).toArray();
     const hotelAllocations = await db.collection("hotelAllocations").find({ passengerId: { $in: passengerIds } }).toArray();
     const trains = await db.collection("trains").find({}).toArray();

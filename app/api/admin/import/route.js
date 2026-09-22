@@ -30,17 +30,17 @@ export async function POST(request) {
       let familyId = null;
       if (record.family) {
         const familyName = String(record.family).substring(0, 100);
-        let family = await db.collection("families").findOne({ familyName, adminId: admin.adminId });
+        let family = await db.collection("families").findOne({ familyName });
         if (!family) {
           const c = await db.collection("families").countDocuments();
           familyId = `F${String(c+1).padStart(6, "0")}`;
-          await db.collection("families").insertOne({ familyId, familyName, adminId: admin.adminId, createdAt: new Date().toISOString() });
+          await db.collection("families").insertOne({ familyId, familyName, createdAt: new Date().toISOString() });
         } else {
           familyId = family.familyId;
         }
       }
 
-      let passenger = await db.collection("passengers").findOne({ mobile, adminId: admin.adminId });
+      let passenger = await db.collection("passengers").findOne({ mobile });
       let pId = null;
 
       let validAadhaar = null;
@@ -66,7 +66,7 @@ export async function POST(request) {
         pId = `P${String(c+1).padStart(6, "0")}`;
         await db.collection("passengers").insertOne({
           passengerId: pId,
-          adminId: admin.adminId,
+          
           name,
           mobile,
           familyId: familyId || "F000000",
@@ -170,7 +170,7 @@ export async function POST(request) {
 
     // Add import history
     await db.collection("importHistory").insertOne({
-      adminId: admin.adminId,
+      
       filename: actionType + " Import",
       count: importedCount,
       timestamp: new Date().toISOString()
@@ -178,7 +178,7 @@ export async function POST(request) {
 
     await db.collection("activityLogs").insertOne({
       action: "Imported Data",
-      adminId: admin.adminId,
+      
       details: `Successfully imported ${importedCount} records via ${actionType || "upload"}`,
       createdAt: new Date().toISOString()
     });
