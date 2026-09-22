@@ -12,17 +12,27 @@ export async function GET(request) {
     const passengerCount = await db.collection("passengers").countDocuments({ adminId: admin.adminId });
     const familyCount = await db.collection("families").countDocuments({ adminId: admin.adminId });
     
-    // Find all passenger IDs for this admin to scope allocations
-    const passengers = await db.collection("passengers").find({ adminId: admin.adminId }, { projection: { passengerId: 1 } }).toArray();
-    const pIds = passengers.map(p => p.passengerId);
+    // Use aggregation to count train allocations without pulling all passenger IDs into Node.js
+    const trainResult = await db.collection("passengers").aggregate([
+      { $match: { adminId: admin.adminId } },
+      { $lookup: { from: "trainAllocations", localField: "passengerId", foreignField: "passengerId", as: "trains" } },
+      { $match: { "trains.0": { $exists: true } } },
+      { $count: "count" }
+    ]).toArray();
+    const trainAllocCount = trainResult.length > 0 ? trainResult[0].count : 0;
 
-    const trainAllocCount = await db.collection("trainAllocations").countDocuments({ passengerId: { $in: pIds } });
-    const hotelAllocCount = await db.collection("hotelAllocations").countDocuments({ passengerId: { $in: pIds } });
+    // Use aggregation to count unique passengers with hotel allocations
+    const hotelResult = await db.collection("passengers").aggregate([
+      { $match: { adminId: admin.adminId } },
+      { $lookup: { from: "hotelAllocations", localField: "passengerId", foreignField: "passengerId", as: "hotels" } },
+      { $match: { "hotels.0": { $exists: true } } },
+      { $count: "count" }
+    ]).toArray();
+    const hotelAllocCount = hotelResult.length > 0 ? hotelResult[0].count : 0;
 
     // Missing info (e.g. no train or no hotel)
     const missingTrain = passengerCount - trainAllocCount;
-    // (Hotel logic is complex if they need multiple days, we will just provide basic stats here)
-    const missingHotel = passengerCount - await db.collection("hotelAllocations").distinct("passengerId", { passengerId: { $in: pIds } }).then(ids => ids.length);
+    const missingHotel = passengerCount - hotelAllocCount;
 
     return NextResponse.json({
       totalPassengers: passengerCount,

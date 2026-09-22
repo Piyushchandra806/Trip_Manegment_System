@@ -25,13 +25,13 @@ export default function AdminLogin() {
       
       if (res.ok && data.success) {
         router.push('/admin');
-        router.refresh();
+        // Do not set loading to false to keep the "Signing in..." state while navigating
       } else {
         setError(data.error || 'Invalid credentials');
+        setLoading(false);
       }
     } catch (err) {
       setError('An error occurred. Please try again.');
-    } finally {
       setLoading(false);
     }
   };
