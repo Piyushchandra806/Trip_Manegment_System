@@ -6,6 +6,18 @@
  *  - currentPassengerName: string - the searched passenger's mobile
  */
 export default function FamilyMembers({ members, currentPassengerName }) {
+  const formatCoach = (coach) => {
+    if (!coach) return "-";
+    const types = ["Sleeper", "3-AC", "3AC"];
+    for (const t of types) {
+      if (coach.toLowerCase().startsWith(t.toLowerCase())) {
+        const rest = coach.substring(t.length).trim();
+        return (<>{rest} <span className="text-sm font-bold opacity-80">({t})</span></>);
+      }
+    }
+    return coach;
+  };
+
   if (!members || members.length === 0) return null;
 
   // Determine if all members have the same coach
@@ -83,7 +95,7 @@ export default function FamilyMembers({ members, currentPassengerName }) {
                 <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
                   <div className="flex gap-2">
                     <span className="text-slate-500">Coach:</span>
-                    <span className="font-bold text-slate-900">{member.train.coach || "-"}</span>
+                    <span className="font-bold text-slate-900">{formatCoach(member.train.coach)}</span>
                   </div>
                   <div className="flex gap-2">
                     <span className="text-slate-500">Berth:</span>

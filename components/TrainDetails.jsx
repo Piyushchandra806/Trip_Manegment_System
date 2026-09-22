@@ -5,6 +5,19 @@
  *  - train: { trainName, trainNumber, coach, berth, berthType }
  */
 export default function TrainDetails({ train }) {
+  const formatCoach = (coach) => {
+    if (!coach) return "-";
+    // Check if it starts with known coach types
+    const types = ["Sleeper", "3-AC", "3AC"];
+    for (const t of types) {
+      if (coach.toLowerCase().startsWith(t.toLowerCase())) {
+        const rest = coach.substring(t.length).trim();
+        return (<>{rest} <span className="text-sm font-bold opacity-80">({t})</span></>);
+      }
+    }
+    return coach;
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
       <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-6 flex items-center gap-2">
@@ -33,7 +46,7 @@ export default function TrainDetails({ train }) {
           <div className="grid grid-cols-3 gap-3">
              <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-center">
                 <p className="text-xs text-blue-600 uppercase tracking-wide font-bold mb-1">Coach</p>
-                <p className="text-2xl font-black text-blue-900">{train.coach || "-"}</p>
+                <p className="text-2xl font-black text-blue-900">{formatCoach(train.coach)}</p>
              </div>
              <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-center">
                 <p className="text-xs text-emerald-600 uppercase tracking-wide font-bold mb-1">Berth</p>
@@ -41,7 +54,7 @@ export default function TrainDetails({ train }) {
              </div>
              <div className="bg-purple-50 border border-purple-100 rounded-xl p-3 flex flex-col justify-center text-center">
                 <p className="text-xs text-purple-600 uppercase tracking-wide font-bold mb-1">Type</p>
-                <p className="text-lg font-bold text-purple-900 leading-tight">{train.berthType || "-"}</p>
+                <p className="text-2xl font-black text-purple-900">{train.berthType || "-"}</p>
              </div>
           </div>
         </div>

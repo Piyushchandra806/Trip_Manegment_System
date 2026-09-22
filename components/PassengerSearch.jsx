@@ -9,8 +9,9 @@ import { useState } from "react";
  *  - onSearch(mobile): callback when user submits a mobile number
  *  - isLoading: boolean to show loading state on the button
  */
-export default function PassengerSearch({ onSearch, isLoading = false }) {
+export default function PassengerSearch({ onSearch, isLoading = false, requireName = false }) {
   const [mobile, setMobile] = useState("");
+  const [name, setName] = useState("");
   const [error, setError] = useState("");
 
   const handleSubmit = (e) => {
@@ -28,7 +29,12 @@ export default function PassengerSearch({ onSearch, isLoading = false }) {
       return;
     }
 
-    onSearch(cleaned);
+    if (requireName && !name.trim()) {
+      setError("Please enter your name.");
+      return;
+    }
+
+    onSearch({ mobile: cleaned, name: name.trim() });
   };
 
   return (
@@ -63,13 +69,39 @@ export default function PassengerSearch({ onSearch, isLoading = false }) {
                        focus:border-slate-400 focus:bg-white focus:outline-none
                        transition-colors duration-200
                        placeholder:text-slate-300 placeholder:tracking-widest
-                       text-slate-800 font-mono"
+                       text-slate-800 font-mono disabled:opacity-50 disabled:bg-slate-100 disabled:cursor-not-allowed"
             autoComplete="tel"
+            disabled={requireName}
           />
+        </div>
+
+        {requireName && (
+          <div className="animate-fade-in mt-4">
+            <label htmlFor="name-input" className="sr-only">
+              Passenger Name
+            </label>
+            <input
+              id="name-input"
+              type="text"
+              placeholder="Passenger Name (अपना नाम लिखें)"
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (error) setError("");
+              }}
+              className="w-full px-4 py-4 text-lg text-center rounded-xl
+                         border-2 border-slate-200 bg-slate-50
+                         focus:border-slate-400 focus:bg-white focus:outline-none
+                         transition-colors duration-200
+                         placeholder:text-slate-400
+                         text-slate-800 font-medium"
+              autoComplete="name"
+            />
+          </div>
+        )}
           {error && (
             <p className="text-red-500 text-sm mt-2 text-center">{error}</p>
           )}
-        </div>
 
         <button
           type="submit"

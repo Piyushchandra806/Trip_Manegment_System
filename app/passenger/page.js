@@ -14,6 +14,7 @@ import SharePreviewModal from "@/components/SharePreviewModal";
  */
 export default function PassengerPage() {
   const [searchState, setSearchState] = useState("idle"); // idle | loading | found | not-found | error
+  const [requireName, setRequireName] = useState(false);
   const [passenger, setPassenger] = useState(null);
   const [familyMembers, setFamilyMembers] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
@@ -30,13 +31,16 @@ export default function PassengerPage() {
   }, [searchState, passenger]);
 
 
-  const handleSearch = async (mobile) => {
+  const handleSearch = async (searchData) => {
+    const mobile = typeof searchData === 'string' ? searchData : searchData.mobile;
+    const name = searchData.name || '';
     setSearchState("loading");
     setErrorMessage("");
     setCopySuccess(false);
 
     try {
-      const response = await fetch(`/api/passenger?mobile=${mobile}`);
+      const url = name ? `/api/passenger?mobile=${mobile}&name=${encodeURIComponent(name)}` : `/api/passenger?mobile=${mobile}`;
+      const response = await fetch(url);
       
       if (response.status === 404) {
         setPassenger(null);
@@ -46,10 +50,20 @@ export default function PassengerPage() {
       }
       
       if (!response.ok) {
-        throw new Error("API error");
+        const errorData = await response.json().catch(() => ({}));
+        if (errorData.multipleMatches) {
+          throw new Error("MULTIPLE_MATCHES|" + (errorData.error || "Multiple passengers found. Please enter your full name."));
+        }
+        throw new Error(errorData.error || "API error");
       }
 
       const data = await response.json();
+      
+      if (response.status === 200 && data.requireName) {
+        setRequireName(true);
+        setSearchState("idle");
+        return;
+      }
       
       setPassenger({
         ...data.passenger,
@@ -62,13 +76,19 @@ export default function PassengerPage() {
       
     } catch (err) {
       
-      setErrorMessage("We couldn't load your trip information. Please try again.");
-      setSearchState("error");
+      if (err.message.startsWith("MULTIPLE_MATCHES|")) {
+        setErrorMessage(err.message.split("|")[1]);
+        setSearchState("error");
+      } else {
+        setErrorMessage(err.message === "API error" ? "We couldn't load your trip information. Please try again." : err.message);
+        setSearchState("error");
+      }
     }
   };
 
   const handleReset = () => {
     setSearchState("idle");
+    setRequireName(false);
     setPassenger(null);
     setFamilyMembers([]);
     setErrorMessage("");
@@ -112,11 +132,12 @@ export default function PassengerPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 print:py-0">
       {/* Search state */}
-      {(searchState === "idle" || searchState === "error") && (
+      {(searchState === "idle" || searchState === "error" || searchState === "loading") && (
         <div className="max-w-lg mx-auto animate-fade-in">
           <PassengerSearch
             onSearch={handleSearch}
             isLoading={searchState === "loading"}
+            requireName={requireName}
           />
           {searchState === "error" && (
              <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-xl text-center text-sm font-medium border border-red-100">
@@ -193,7 +214,7 @@ export default function PassengerPage() {
             😕
           </div>
           <h2 className="text-xl font-bold text-slate-800 mb-2">We couldn't find your details.</h2>
-          <p className="text-slate-500 mb-6">Please check your mobile number and try again.</p>
+          <p className="text-slate-500 mb-6">Please check your details and try again.</p>
           <button
             onClick={handleReset}
             className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 transition-colors"

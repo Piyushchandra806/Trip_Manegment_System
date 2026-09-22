@@ -104,7 +104,7 @@ export default function FamiliesList() {
               </thead>
               <tbody>
                 {f.members.map(m => (
-                  <tr key={m.mobile} className="border-b border-slate-100">
+                  <tr key={m._id || m.passengerId || Math.random()} className="border-b border-slate-100">
                     <td className="py-2">{m.name}</td>
                     <td className="py-2">{m.mobile}</td>
                     <td className="py-2">{m.train ? `${m.train.coach}-${m.train.berth}` : '-'}</td>
@@ -148,7 +148,7 @@ export default function FamiliesList() {
             
             <div className="space-y-4">
               {selectedFamily.members.map(m => (
-                <div key={m.mobile} className="p-4 border rounded-xl flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-slate-50 hover:bg-white transition-colors">
+                <div key={m._id || m.passengerId || Math.random()} className="p-4 border rounded-xl flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-slate-50 hover:bg-white transition-colors">
                   <div>
                     <h4 className="font-bold text-slate-800">{m.name}</h4>
                     <p className="text-sm text-slate-500">{m.mobile}</p>
