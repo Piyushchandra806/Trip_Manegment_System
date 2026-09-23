@@ -11,15 +11,23 @@ export default function AdminLogin() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (loading) return;
+    
     setLoading(true);
     setError('');
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
     
     try {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       const data = await res.json();
       
@@ -31,7 +39,12 @@ export default function AdminLogin() {
         setLoading(false);
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        setError('Unable to connect to the server. Please check your internet connection and try again.');
+      } else {
+        setError('An error occurred. Please try again.');
+      }
       setLoading(false);
     }
   };

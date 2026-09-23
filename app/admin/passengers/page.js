@@ -115,7 +115,82 @@ export default function PassengersList() {
   };
 
   const handlePrint = () => {
-    window.print();
+    let printIframe = document.getElementById('print-iframe');
+    if (!printIframe) {
+      printIframe = document.createElement('iframe');
+      printIframe.id = 'print-iframe';
+      printIframe.style.position = 'absolute';
+      printIframe.style.width = '0';
+      printIframe.style.height = '0';
+      printIframe.style.border = 'none';
+      document.body.appendChild(printIframe);
+    }
+
+    const printDocument = printIframe.contentWindow.document;
+    printDocument.open();
+    printDocument.write(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <title>Passenger List - Print</title>
+        <style>
+          @page { size: A4 landscape; margin: 15mm; }
+          body { font-family: system-ui, -apple-system, sans-serif; color: #333; margin: 0; padding: 0; }
+          h1 { text-align: center; font-size: 24px; margin-bottom: 5px; }
+          .meta { text-align: center; font-size: 14px; color: #666; margin-bottom: 20px; }
+          table { width: 100%; border-collapse: collapse; font-size: 12px; page-break-inside: auto; }
+          thead { display: table-header-group; }
+          tr { page-break-inside: avoid; page-break-after: auto; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f8f9fa; font-weight: bold; }
+          .missing { color: #d97706; }
+        </style>
+      </head>
+      <body>
+        <h1>Passenger List</h1>
+        <div class="meta">Total Passengers: ${filteredData.length}</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Gender</th>
+              <th>Rel. Name</th>
+              <th>Address</th>
+              <th>Mobile</th>
+              <th>Family</th>
+              <th>Coach</th>
+              <th>Berth</th>
+              <th>Hotel & Room</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredData.map(p => `
+              <tr>
+                <td>${p.name || ''}</td>
+                <td>${p.age || ''}</td>
+                <td>${p.gender || ''}</td>
+                <td>${p.relativeName || ''}</td>
+                <td>${p.address || ''}</td>
+                <td>${p.mobile || ''}</td>
+                <td>${(p.familyName && p.familyName !== 'Unknown') ? p.familyName : '<span class="missing">Missing</span>'}</td>
+                <td>${p.coach || '<span class="missing">-</span>'}</td>
+                <td>${p.berth || ''}</td>
+                <td>${p.hotel ? p.hotel + ' / ' + p.room : '<span class="missing">Missing</span>'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `);
+    printDocument.close();
+
+    printIframe.contentWindow.focus();
+    setTimeout(() => {
+      printIframe.contentWindow.print();
+    }, 250);
   };
 
   if (loading) return <div className="text-center py-10">Loading passengers...</div>;
@@ -239,14 +314,7 @@ export default function PassengersList() {
         </div>
       )}
       
-      {/* Basic print styles */}
-      <style dangerouslySetInnerHTML={{__html: `
-        @media print {
-          body * { visibility: hidden; }
-          .max-w-7xl, .max-w-7xl * { visibility: visible; }
-          .max-w-7xl { position: absolute; left: 0; top: 0; width: 100%; }
-        }
-      `}} />
+
     </div>
   );
 }
