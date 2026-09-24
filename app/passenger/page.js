@@ -14,9 +14,7 @@ import SharePreviewModal from "@/components/SharePreviewModal";
  */
 export default function PassengerPage() {
   const [searchState, setSearchState] = useState("idle"); // idle | loading | found | not-found | error
-  const [requireName, setRequireName] = useState(false);
-  const [passenger, setPassenger] = useState(null);
-  const [familyMembers, setFamilyMembers] = useState([]);
+  const [passengers, setPassengers] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   
   const [copySuccess, setCopySuccess] = useState(false);
@@ -33,12 +31,12 @@ export default function PassengerPage() {
   }, []);
 
   useEffect(() => {
-    if (searchState === "found" && passenger) {
-      window.dispatchEvent(new CustomEvent('passengerFound', { detail: passenger }));
+    if (searchState === "found" && passengers.length > 0) {
+      window.dispatchEvent(new CustomEvent('passengerFound', { detail: passengers[0] })); // pass first for WhatsApp button
     } else {
       window.dispatchEvent(new CustomEvent('passengerFound', { detail: null }));
     }
-  }, [searchState, passenger]);
+  }, [searchState, passengers]);
 
 
   const handleSearch = async (searchData) => {
@@ -63,41 +61,30 @@ export default function PassengerPage() {
     setCopySuccess(false);
 
     try {
-      const url = name ? `/api/passenger?mobile=${mobile}&name=${encodeURIComponent(name)}` : `/api/passenger?mobile=${mobile}`;
+      const url = `/api/passenger?mobile=${mobile}`;
       const response = await fetch(url, { signal: controller.signal });
       clearTimeout(timeoutId);
       
-      if (response.status === 404) {
-        setPassenger(null);
-        setFamilyMembers([]);
+            if (response.status === 404) {
+        setPassengers([]);
         setSearchState("not-found");
         return;
       }
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        if (errorData.multipleMatches) {
-          throw new Error("MULTIPLE_MATCHES|" + (errorData.error || "Multiple passengers found. Please enter your full name."));
-        }
         throw new Error(errorData.error || "API error");
       }
 
       const data = await response.json();
       
-      if (response.status === 200 && data.requireName) {
-        setRequireName(true);
-        setSearchState("idle");
-        return;
+      if (data.passengers) {
+        setPassengers(data.passengers.map(p => ({
+          ...p,
+          fullMobile: mobile
+        })));
+        setSearchState("found");
       }
-      
-      setPassenger({
-        ...data.passenger,
-        fullMobile: mobile,
-        train: data.train,
-        hotels: data.hotels
-      });
-      setFamilyMembers(data.family || []);
-      setSearchState("found");
       
     } catch (err) {
       clearTimeout(timeoutId);
@@ -115,44 +102,33 @@ export default function PassengerPage() {
         }
       }
 
-      if (err.message && err.message.startsWith("MULTIPLE_MATCHES|")) {
-        setErrorMessage(err.message.split("|")[1]);
-        setSearchState("error");
-      } else {
-        setErrorMessage(err.message === "API error" ? "We couldn't load your trip information. Please try again." : err.message);
-        setSearchState("error");
-      }
+      setErrorMessage(err.message === "API error" ? "We couldn't load your trip information. Please try again." : err.message);
+      setSearchState("error");
     }
   };
 
   const handleReset = () => {
     setSearchState("idle");
-    setRequireName(false);
-    setPassenger(null);
-    setFamilyMembers([]);
+    setPassengers([]);
     setErrorMessage("");
   };
 
-  const generateShareText = () => {
-    let text = `${passenger.name}\n\n`;
+    const generateShareText = () => {
+    if (!passengers || passengers.length === 0) return "";
+    let text = `Trip Details for Mobile: ${passengers[0].fullMobile}\n\n`;
     
-    if (passenger.train) {
-      text += `Train:\nCoach: ${passenger.train.coach}\nBerth: ${passenger.train.berth} ${passenger.train.berthType !== 'Unknown' ? passenger.train.berthType : ''}\n\n`;
-    }
-    
-    if (familyMembers.length > 0) {
-      text += `Family Members:\n`;
-      familyMembers.forEach(m => {
-        if (m.mobile !== passenger.mobile) text += `- ${m.name}\n`;
-      });
+    passengers.forEach((p, index) => {
+      text += `${index + 1}. ${p.name}\n`;
+      if (p.train) {
+        text += `   Train: Coach ${p.train.coach}, Berth ${p.train.berth} ${p.train.berthType !== 'Unknown' && p.train.berthType ? p.train.berthType : ''}\n`;
+      }
+      if (p.hotels && p.hotels.length > 0) {
+        p.hotels.forEach(h => {
+          text += `   Hotel (Day ${h.day}): ${h.hotelName}, Room: ${h.room}\n`;
+        });
+      }
       text += `\n`;
-    }
-    
-    if (passenger.hotels && passenger.hotels.length > 0) {
-      passenger.hotels.forEach(h => {
-        text += `Hotel Day ${h.day}:\n${h.hotelName}\nFloor: ${h.floor}\nRoom: ${h.roomNumber}\n\n`;
-      });
-    }
+    });
     
     return text.trim();
   };
@@ -176,8 +152,7 @@ export default function PassengerPage() {
           <PassengerSearch
             onSearch={handleSearch}
             isLoading={searchState === "loading"}
-            requireName={requireName}
-          />
+            />
           {searchState === "error" && (
              <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-xl text-center text-sm font-medium border border-red-100">
                {errorMessage}
@@ -194,13 +169,13 @@ export default function PassengerPage() {
         </div>
       )}
 
-      {/* Passenger found */}
-      {searchState === "found" && passenger && (
+      {/* Passengers found */}
+      {searchState === "found" && passengers.length > 0 && (
         <div className="animate-fade-in">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
               <div className="flex items-center gap-2 text-green-600 font-bold text-lg mb-2 print:hidden">
-                <CheckCircle2 className="w-6 h-6" /> ✓ Your trip details are ready
+                <CheckCircle2 className="w-6 h-6" /> ✓ Trip details for {passengers.length} passenger{passengers.length > 1 ? 's' : ''}
               </div>
               <button
                 onClick={handleReset}
@@ -222,7 +197,7 @@ export default function PassengerPage() {
                   onClick={handleShare}
                   className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
                 >
-                  <Share2 className="w-4 h-4" /> Share My Details
+                  <Share2 className="w-4 h-4" /> Share Card
                 </button>
             </div>
           </div>
@@ -230,17 +205,20 @@ export default function PassengerPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
             {/* Left column */}
             <div className="lg:col-span-5 space-y-4 lg:space-y-6">
-              <PassengerCard passenger={passenger} />
-              <TrainDetails train={passenger.train} />
+              <PassengerCard passenger={passengers[0]} />
+              <TrainDetails train={passengers[0].train} />
             </div>
 
             {/* Right column */}
             <div className="lg:col-span-7 space-y-4 lg:space-y-6">
               <FamilyMembers
-                members={familyMembers}
-                currentPassengerName={passenger.name}
+                members={passengers}
+                currentPassengerName={passengers[0].name}
               />
-              <HotelDetails hotels={passenger.hotels} familyMembers={familyMembers} />
+              <HotelDetails 
+                hotels={passengers.find(p => p.hotels && p.hotels.length > 0)?.hotels || []} 
+                familyMembers={passengers} 
+              />
             </div>
           </div>
         </div>
@@ -265,8 +243,8 @@ export default function PassengerPage() {
       <SharePreviewModal
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
-        passenger={passenger}
-        familyMembers={familyMembers}
+        passenger={passengers[0]}
+        familyMembers={passengers.slice(1)}
       />
 
     </div>

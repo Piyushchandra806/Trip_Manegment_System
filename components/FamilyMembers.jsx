@@ -36,11 +36,11 @@ export default function FamilyMembers({ members, currentPassengerName }) {
         </h3>
 
         <ul className="space-y-3">
-          {members.map((member) => {
-            const isCurrent = member.mobile === currentPassengerName;
+          {members.map((member, index) => {
+            const isCurrent = member.mobile === currentPassengerName || member.name === currentPassengerName;
             return (
               <li
-                key={member.mobile}
+                key={member.passengerId || index}
                 className={`flex items-center gap-2 text-base font-medium ${
                   isCurrent ? "text-slate-900" : "text-slate-600 pl-6"
                 }`}
@@ -54,7 +54,6 @@ export default function FamilyMembers({ members, currentPassengerName }) {
           })}
         </ul>
       </div>
-
       {/* Seat Arrangement */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
         <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -78,9 +77,9 @@ export default function FamilyMembers({ members, currentPassengerName }) {
         )}
 
         <div className="space-y-4">
-          {members.map((member) => (
+          {members.map((member, index) => (
             <div
-              key={member.mobile}
+              key={member.passengerId || index}
               className={`border rounded-xl p-4 transition-colors ${
                 member.mobile === currentPassengerName
                   ? "border-blue-200 bg-blue-50/50"

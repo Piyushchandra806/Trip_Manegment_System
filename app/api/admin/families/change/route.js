@@ -21,22 +21,18 @@ export async function POST(request) {
       return NextResponse.json({ error: "Passenger not found" }, { status: 404 });
     }
 
-    // Verify target family belongs to admin
-    const family = await db.collection("families").findOne({ familyId: targetFamilyId });
-    if (!family) {
-      return NextResponse.json({ error: "Family not found" }, { status: 404 });
-    }
+    // Target family ID is now the target Mobile Number
+    const targetMobile = targetFamilyId;
 
-    // Assign passenger to new family
+    // Assign passenger to new "family" (which means updating their mobile number)
     await db.collection("passengers").updateOne(
       { passengerId: passenger.passengerId },
-      { $set: { familyId: targetFamilyId, updatedAt: new Date().toISOString() } }
+      { $set: { mobile: targetMobile, updatedAt: new Date().toISOString() } }
     );
 
     await db.collection("activityLogs").insertOne({
       action: "Family assignment changed",
-      
-      details: `Passenger ${passenger.passengerId} moved to family ${targetFamilyId}`,
+      details: `Passenger ${passenger.passengerId} moved to mobile/family ${targetMobile}`,
       createdAt: new Date().toISOString()
     });
 

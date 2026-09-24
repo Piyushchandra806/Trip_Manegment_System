@@ -9,16 +9,25 @@ export async function GET(request) {
 
     const { db } = await connectToDatabase();
     
-    // Only return families assigned to this admin
-    const rawFamilies = await db.collection("families").find({}).toArray();
-    
-    // To count members, we just query passengers for this admin
     const passengers = await db.collection("passengers").find({}).toArray();
 
-    const families = rawFamilies.map(f => {
-      const members = passengers.filter(p => p.familyId === f.familyId);
+    // Group passengers by mobile number
+    const groupedByMobile = {};
+    for (const p of passengers) {
+      const mobile = p.mobile || "Unknown";
+      if (!groupedByMobile[mobile]) {
+        groupedByMobile[mobile] = [];
+      }
+      groupedByMobile[mobile].push(p);
+    }
+
+    const families = Object.keys(groupedByMobile).map(mobile => {
+      const members = groupedByMobile[mobile];
+      // Use the first member's name as the family name prefix
+      const familyName = members[0].name.split(' ')[0]; 
       return {
-        ...f,
+        familyId: mobile, // Use mobile as the family ID for moving
+        familyName: `${familyName} & Family (${mobile})`,
         memberCount: members.length,
         members: members
       };

@@ -10,7 +10,10 @@ export async function GET(request) {
     const { db } = await connectToDatabase();
     
     const passengerCount = await db.collection("passengers").countDocuments({});
-    const familyCount = await db.collection("families").countDocuments({});
+    
+    // Calculate the number of unique families based on distinct mobile numbers
+    const uniqueMobiles = await db.collection("passengers").distinct("mobile");
+    const familyCount = uniqueMobiles.filter(m => m).length;
     
     // Use aggregation to count train allocations without pulling all passenger IDs into Node.js
     const trainResult = await db.collection("passengers").aggregate([
