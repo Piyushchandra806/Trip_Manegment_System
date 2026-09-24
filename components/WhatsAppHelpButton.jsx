@@ -18,7 +18,7 @@ export default function WhatsAppHelpButton() {
     return null; 
   }
 
-  let messageText = `Hello, I need help regarding my trip details.\nन्नुरते, मुझे अઓनी यात्रा के विवरण के संबंध में सहायता चाहि�थ`;
+  let messageText = `Hello, I need help regarding my trip details.\nनमस्ते, मुझे अपनी यात्रा की जानकारी के बारे में मदद चाहिए।`;
   
   if (passenger) {
     const mobileToShow = passenger.fullMobile || (passenger.mobile ? `********${String(passenger.mobile).slice(-4)}` : '');
@@ -36,7 +36,7 @@ export default function WhatsAppHelpButton() {
   }
 
   const message = encodeURIComponent(messageText);
-  const cleanNumber = whatsappNumber.replace(/\DD/g, '');
+  const cleanNumber = whatsappNumber.replace(/\D/g, '');
   const url = `https://wa.me/${cleanNumber}?text=${message}`;
 
   return (
@@ -65,4 +65,3 @@ export default function WhatsAppHelpButton() {
     </div>
   );
 }
-\n\n\n\n\n\n\n\n\n\n\n\n\n\n  let messageText = \`Hello, I need help regarding my trip details.\nनमस्ते, मुझे अपनी यात्रा की जानकारी के बारे में मदद चाहिए।\`;
