@@ -59,7 +59,7 @@ export async function GET(request) {
         ...p,
         relativeName: p.relationName || p.relativeName || "",
         aadhaarNumber: maskedAadhaar,
-        familyName: fam ? fam.familyName : (p.mobile ? `Family (${p.mobile})` : "Unknown"),
+        familyName: p.mobile ? `Family (${p.mobile})` : "Unknown",
         adminName: adminObj ? adminObj.username : "All",
         train: trainInfo,
         hotels: hotelsInfo
