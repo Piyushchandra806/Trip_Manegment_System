@@ -20,8 +20,8 @@ export async function GET(request, { params }) {
     return NextResponse.json({
       trainName: train ? train.trainName : "",
       trainNumber: train ? train.trainNumber : "",
-      coachNumber: alloc.coachNumber,
-      berthNumber: alloc.berthNumber,
+      coachNumber: alloc.coach || alloc.coachNumber,
+      berthNumber: alloc.berth || alloc.berthNumber,
       berthType: alloc.berthType
     });
   } catch (err) {

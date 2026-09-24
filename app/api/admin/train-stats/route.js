@@ -16,12 +16,19 @@ export async function GET(request) {
     
     const allocs = await db.collection("trainAllocations").find({ passengerId: { $in: pIds } }).toArray();
 
+    const mobileToFamilyName = {};
+    for (const p of passengers) {
+      if (p.mobile && !mobileToFamilyName[p.mobile]) {
+        mobileToFamilyName[p.mobile] = `${p.name ? p.name.split(' ')[0] : 'Unknown'} & Family (${p.mobile})`;
+      }
+    }
+
     const coachesMap = {};
     for (const alloc of allocs) {
       const p = passengers.find(x => x.passengerId === alloc.passengerId);
       if (!p) continue;
       
-      const c = alloc.coachNumber || "Unknown";
+      const c = alloc.coach || alloc.coachNumber || "Unknown";
       if (!coachesMap[c]) {
         coachesMap[c] = {
           coach: c,
@@ -32,10 +39,10 @@ export async function GET(request) {
       const fam = families.find(f => f.familyId === p.familyId);
       
       coachesMap[c].passengers.push({
-        berth: alloc.berthNumber || "Unknown",
+        berth: alloc.berth || alloc.berthNumber || "Unknown",
         name: p.name,
         mobile: p.mobile,
-        familyName: fam ? fam.familyName : "Unknown"
+        familyName: fam ? fam.familyName : (p.mobile ? mobileToFamilyName[p.mobile] : "Unknown")
       });
     }
     

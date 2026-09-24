@@ -21,6 +21,13 @@ export async function GET(request) {
     const rooms = await getCachedArray(db, "rooms");
     const adminsList = await db.collection("admins").find({}).maxTimeMS(15000).toArray();
 
+    const mobileToFamilyName = {};
+    for (const p of passengers) {
+      if (p.mobile && !mobileToFamilyName[p.mobile]) {
+        mobileToFamilyName[p.mobile] = `${p.name ? p.name.split(' ')[0] : 'Unknown'} & Family (${p.mobile})`;
+      }
+    }
+
     const enriched = passengers.map(p => {
       const fam = families.find(f => f.familyId === p.familyId);
       const adminObj = adminsList.find(a => a.adminId === p.adminId);
@@ -31,8 +38,8 @@ export async function GET(request) {
         const t = trains.find(t => t.trainId === ta.trainId);
         trainInfo = {
           mobile: p.mobile,
-          coach: ta.coachNumber || ta.coach || "",
-          berth: ta.berthNumber || ta.berth || "",
+          coach: ta.coach || ta.coachNumber,
+          berth: ta.berth || ta.berthNumber,
           berthType: ta.berthType,
           trainName: t ? t.trainName : "",
           trainNumber: t ? t.trainNumber : ""
@@ -59,7 +66,7 @@ export async function GET(request) {
         ...p,
         relativeName: p.relationName || p.relativeName || "",
         aadhaarNumber: maskedAadhaar,
-        familyName: p.mobile ? `Family (${p.mobile})` : "Unknown",
+        familyName: fam ? fam.familyName : (p.mobile ? mobileToFamilyName[p.mobile] : "Unknown"),
         adminName: adminObj ? adminObj.username : "All",
         train: trainInfo,
         hotels: hotelsInfo
