@@ -65,3 +65,4 @@ export default function WhatsAppHelpButton() {
     </div>
   );
 }
+\n\n\n\n\n\n\n\n\n\n\n\n\n\n  let messageText = \`Hello, I need help regarding my trip details.\nनमस्ते, मुझे अपनी यात्रा की जानकारी के बारे में मदद चाहिए।\`;

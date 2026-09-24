@@ -2,9 +2,16 @@ import { NextResponse } from 'next/server';
 import { createSession } from '@/lib/auth';
 import { getAdminByUsername, verifyAdminPassword } from '@/lib/adminAuth';
 import { checkRateLimit } from '@/lib/rateLimit';
+import { connectToDatabase } from '@/lib/mongodb';
 
 export async function POST(request) {
   try {
+    // Start DB connection concurrently with Rate Limiting to mask cold start latency
+    const dbPromise = connectToDatabase().catch(err => {
+      console.error('DB connect error during login:', err);
+      return null;
+    });
+    
     // Distributed rate limiting
     const rateLimitResult = await checkRateLimit(request, 'login');
     if (!rateLimitResult.success) {
@@ -20,7 +27,8 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Invalid credentials' }, { status: 401 });
     }
 
-    // Centralized admin fetch and verification
+    // Await the pre-warmed DB connection (passed implicitly through global promise in mongodb.js)
+    await dbPromise;
     const admin = await getAdminByUsername(username);
 
     if (admin && await verifyAdminPassword(password, admin.passwordHash)) {

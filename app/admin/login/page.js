@@ -32,8 +32,14 @@ export default function AdminLogin() {
       const data = await res.json();
       
       if (res.ok && data.success) {
-        router.push('/admin');
-        // Do not set loading to false to keep the "Signing in..." state while navigating
+        // Change button text by updating a state so the user knows login succeeded
+        const btn = document.getElementById('login-button');
+        if (btn) btn.innerText = 'Redirecting...';
+        
+        // Force hard navigation so the browser shows a loading spinner
+        // This avoids the 'frozen' UI feeling while Next.js prefetches the layout.
+        window.location.href = '/admin';
+        // Do not set loading to false to keep the state while navigating
       } else {
         setError(data.error || 'Invalid credentials');
         setLoading(false);
@@ -88,6 +94,7 @@ export default function AdminLogin() {
           </div>
           
           <button 
+            id="login-button"
             type="submit" 
             disabled={loading}
             className="w-full bg-slate-800 text-white font-semibold py-3 rounded-xl hover:bg-slate-700 transition-colors disabled:opacity-50 mt-4"
