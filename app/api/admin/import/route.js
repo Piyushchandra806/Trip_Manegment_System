@@ -176,6 +176,13 @@ export async function POST(request) {
       timestamp: new Date().toISOString()
     });
 
+    if (importedCount > 0) {
+      const { invalidateCache } = await import("@/lib/staticCache");
+      invalidateCache("trains");
+      invalidateCache("hotels");
+      invalidateCache("rooms");
+    }
+
     await db.collection("activityLogs").insertOne({
       action: "Imported Data",
       

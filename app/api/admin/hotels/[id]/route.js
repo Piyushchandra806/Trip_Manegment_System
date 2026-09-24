@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getLoggedInAdmin } from "@/lib/adminAuth";
-
+import { getCachedArray, invalidateCache } from "@/lib/staticCache";
 export async function GET(request, { params }) {
   try {
     const admin = await getLoggedInAdmin(request);
@@ -15,8 +15,8 @@ export async function GET(request, { params }) {
     }
 
     const allocs = await db.collection("hotelAllocations").find({ passengerId: passenger.passengerId }).toArray();
-    const hotels = await db.collection("hotels").find({}).toArray();
-    const rooms = await db.collection("rooms").find({}).toArray();
+    const hotels = await getCachedArray(db, "hotels");
+    const rooms = await getCachedArray(db, "rooms");
 
     const response = allocs.map(a => {
       const h = hotels.find(h => h.hotelId === a.hotelId);
@@ -60,6 +60,7 @@ export async function POST(request, { params }) {
       const count = await db.collection("hotels").countDocuments();
       hotel = { hotelId: `H${String(count+1).padStart(6, "0")}`, hotelName, createdAt: new Date().toISOString() };
       await db.collection("hotels").insertOne(hotel);
+      invalidateCache("hotels");
     }
 
     // Upsert Room (Not globally unique, scoped to hotel)
@@ -68,6 +69,7 @@ export async function POST(request, { params }) {
       const count = await db.collection("rooms").countDocuments();
       room = { roomId: `R${String(count+1).padStart(6, "0")}`, hotelId: hotel.hotelId, roomNumber, floor: floor || "", createdAt: new Date().toISOString() };
       await db.collection("rooms").insertOne(room);
+      invalidateCache("rooms");
     }
 
     const allocCount = await db.collection("hotelAllocations").countDocuments();

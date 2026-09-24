@@ -1,9 +1,19 @@
 import { NextResponse } from 'next/server';
 import { createAdmin, hasAnyAdmins } from '@/lib/adminAuth';
 import { verifySession } from '@/lib/auth';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 export async function POST(request) {
   try {
+    // Distributed rate limiting
+    const rateLimitResult = await checkRateLimit(request, 'setup');
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: rateLimitResult.error },
+        { status: rateLimitResult.status }
+      );
+    }
+
     const { username, password } = await request.json();
 
     if (!username || !password || password.length < 8) {

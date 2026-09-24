@@ -52,6 +52,9 @@ export async function PUT(request, { params }) {
       const count = await db.collection("trains").countDocuments();
       train = { trainId: `T${String(count+1).padStart(6, "0")}`, trainName, trainNumber: trainNumber || "", createdAt: new Date().toISOString() };
       await db.collection("trains").insertOne(train);
+      
+      const { invalidateCache } = await import("@/lib/staticCache");
+      invalidateCache("trains");
     }
 
     // Upsert Coach

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import PassengerSearch from "@/components/PassengerSearch";
 import PassengerCard from "@/components/PassengerCard";
 import TrainDetails from "@/components/TrainDetails";
@@ -21,6 +21,16 @@ export default function PassengerPage() {
   
   const [copySuccess, setCopySuccess] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const abortControllerRef = useRef(null);
+
+  useEffect(() => {
+    // Cleanup on unmount
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort('unmount');
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (searchState === "found" && passenger) {
@@ -34,13 +44,28 @@ export default function PassengerPage() {
   const handleSearch = async (searchData) => {
     const mobile = typeof searchData === 'string' ? searchData : searchData.mobile;
     const name = searchData.name || '';
+
+    // Abort previous request if it's still running
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort('new_request');
+    }
+    
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    // Set a 10-second timeout for the request
+    const timeoutId = setTimeout(() => {
+      controller.abort('timeout');
+    }, 10000);
+
     setSearchState("loading");
     setErrorMessage("");
     setCopySuccess(false);
 
     try {
       const url = name ? `/api/passenger?mobile=${mobile}&name=${encodeURIComponent(name)}` : `/api/passenger?mobile=${mobile}`;
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
       
       if (response.status === 404) {
         setPassenger(null);
@@ -75,8 +100,22 @@ export default function PassengerPage() {
       setSearchState("found");
       
     } catch (err) {
+      clearTimeout(timeoutId);
       
-      if (err.message.startsWith("MULTIPLE_MATCHES|")) {
+      if (err.name === 'AbortError') {
+        const reason = controller.signal.reason;
+        if (reason === 'new_request' || reason === 'unmount') {
+          // Do not update UI state for intentionally cancelled requests
+          return;
+        }
+        if (reason === 'timeout') {
+          setErrorMessage("The server is taking too long to respond. Please try again.");
+          setSearchState("error");
+          return;
+        }
+      }
+
+      if (err.message && err.message.startsWith("MULTIPLE_MATCHES|")) {
         setErrorMessage(err.message.split("|")[1]);
         setSearchState("error");
       } else {

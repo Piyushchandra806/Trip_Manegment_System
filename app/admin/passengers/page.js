@@ -33,8 +33,19 @@ export default function PassengersList() {
   const [sortAsc, setSortAsc] = useState(true);
 
   useEffect(() => {
-    fetch('/api/admin/passengers')
-      .then(res => res.json())
+    const controller = new AbortController();
+    
+    // Set a timeout for the request (e.g., 20 seconds)
+    const timeoutId = setTimeout(() => {
+      controller.abort('timeout');
+    }, 20000);
+
+    fetch('/api/admin/passengers', { signal: controller.signal })
+      .then(res => {
+        clearTimeout(timeoutId);
+        if (!res.ok) throw new Error('API Error');
+        return res.json();
+      })
       .then(data => {
         // data is a flat list of enriched passengers
         const allPass = data.map(m => ({
@@ -49,7 +60,18 @@ export default function PassengersList() {
         }));
         setPassengers(allPass);
         setLoading(false);
+      })
+      .catch(err => {
+        clearTimeout(timeoutId);
+        if (err.name === 'AbortError') return; // Ignore intentionally cancelled or unmounted
+        console.error(err);
+        setLoading(false);
       });
+
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort('unmount');
+    };
   }, []);
 
   // Get unique options for filters

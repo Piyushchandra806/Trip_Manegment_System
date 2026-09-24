@@ -1,9 +1,19 @@
 import { NextResponse } from 'next/server';
 import { createSession } from '@/lib/auth';
 import { getAdminByUsername, verifyAdminPassword } from '@/lib/adminAuth';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 export async function POST(request) {
   try {
+    // Distributed rate limiting
+    const rateLimitResult = await checkRateLimit(request, 'login');
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: rateLimitResult.error },
+        { status: rateLimitResult.status }
+      );
+    }
+
     const { username, password } = await request.json();
 
     if (!username || !password) {
@@ -13,7 +23,7 @@ export async function POST(request) {
     // Centralized admin fetch and verification
     const admin = await getAdminByUsername(username);
 
-    if (admin && verifyAdminPassword(password, admin.passwordHash)) {
+    if (admin && await verifyAdminPassword(password, admin.passwordHash)) {
       const token = await createSession({ admin: true, username: admin.username, adminId: admin.adminId });
       
       const response = NextResponse.json({ success: true });

@@ -22,6 +22,8 @@ export async function PUT(request, { params }) {
       const count = await db.collection("hotels").countDocuments();
       hotel = { hotelId: `H${String(count+1).padStart(6, "0")}`, hotelName, createdAt: new Date().toISOString() };
       await db.collection("hotels").insertOne(hotel);
+      const { invalidateCache } = await import("@/lib/staticCache");
+      invalidateCache("hotels");
     }
 
     // Upsert Room
@@ -30,6 +32,8 @@ export async function PUT(request, { params }) {
       const count = await db.collection("rooms").countDocuments();
       room = { roomId: `R${String(count+1).padStart(6, "0")}`, hotelId: hotel.hotelId, roomNumber, floor: floor || "", createdAt: new Date().toISOString() };
       await db.collection("rooms").insertOne(room);
+      const { invalidateCache } = await import("@/lib/staticCache");
+      invalidateCache("rooms");
     }
 
     await db.collection("hotelAllocations").updateOne(

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getLoggedInAdmin } from "@/lib/adminAuth";
+import { getCachedArray } from "@/lib/staticCache";
 
 export async function GET(request) {
   try {
@@ -9,16 +10,16 @@ export async function GET(request) {
 
     const { db } = await connectToDatabase();
     
-    const passengers = await db.collection("passengers").find({}).toArray();
+    const passengers = await db.collection("passengers").find({}).maxTimeMS(15000).toArray();
     const passengerIds = passengers.map(p => p.passengerId);
     
-    const families = await db.collection("families").find({}).toArray();
-    const trainAllocations = await db.collection("trainAllocations").find({ passengerId: { $in: passengerIds } }).toArray();
-    const hotelAllocations = await db.collection("hotelAllocations").find({ passengerId: { $in: passengerIds } }).toArray();
-    const trains = await db.collection("trains").find({}).toArray();
-    const hotels = await db.collection("hotels").find({}).toArray();
-    const rooms = await db.collection("rooms").find({}).toArray();
-    const adminsList = await db.collection("admins").find({}).toArray();
+    const families = await db.collection("families").find({}).maxTimeMS(15000).toArray();
+    const trainAllocations = await db.collection("trainAllocations").find({ passengerId: { $in: passengerIds } }).maxTimeMS(15000).toArray();
+    const hotelAllocations = await db.collection("hotelAllocations").find({ passengerId: { $in: passengerIds } }).maxTimeMS(15000).toArray();
+    const trains = await getCachedArray(db, "trains");
+    const hotels = await getCachedArray(db, "hotels");
+    const rooms = await getCachedArray(db, "rooms");
+    const adminsList = await db.collection("admins").find({}).maxTimeMS(15000).toArray();
 
     const enriched = passengers.map(p => {
       const fam = families.find(f => f.familyId === p.familyId);

@@ -1,37 +1,17 @@
 import { NextResponse } from 'next/server';
 import { countPassengersByMobile, getCompleteTripDetails } from '@/lib/tripData';
 
-// Simple in-memory rate limiter
-const rateLimitMap = new Map();
-const MAX_REQUESTS = 50;
-const WINDOW_MS = 60 * 1000; // 1 minute
+import { checkRateLimit } from '@/lib/rateLimit';
 
 export async function GET(request) {
-  const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
-  
-  // Clean up old entries
-  const now = Date.now();
-  for (const [key, value] of rateLimitMap.entries()) {
-    if (now - value.startTime > WINDOW_MS) {
-      rateLimitMap.delete(key);
-    }
-  }
-
-  // Rate limiting logic
-  let limitData = rateLimitMap.get(ip) || { count: 0, startTime: now };
-  if (now - limitData.startTime > WINDOW_MS) {
-    limitData = { count: 0, startTime: now };
-  }
-  
-  if (limitData.count >= MAX_REQUESTS) {
+  // Distributed rate limiting
+  const rateLimitResult = await checkRateLimit(request, 'passenger');
+  if (!rateLimitResult.success) {
     return NextResponse.json(
-      { error: 'Too many requests. Please wait a moment and try again.' },
-      { status: 429 }
+      { error: rateLimitResult.error },
+      { status: rateLimitResult.status }
     );
   }
-  
-  limitData.count++;
-  rateLimitMap.set(ip, limitData);
 
   const { searchParams } = new URL(request.url);
   const mobile = searchParams.get('mobile');
