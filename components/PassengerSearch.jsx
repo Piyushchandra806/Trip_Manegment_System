@@ -13,6 +13,7 @@ export default function PassengerSearch({ onSearch, isLoading = false, requireNa
   const [mobile, setMobile] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
+  const [isPosterOpen, setIsPosterOpen] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -129,6 +130,62 @@ export default function PassengerSearch({ onSearch, isLoading = false, requireNa
       <p className="text-xs text-slate-400 text-center mt-4">
         Use your registered mobile number to find your seat and hotel details
       </p>
+
+      {/* Tour Poster Section */}
+      <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col items-center">
+        <p className="text-sm font-semibold text-slate-700 mb-3">
+          Tour Itinerary & Details
+        </p>
+        <button
+          type="button"
+          onClick={() => setIsPosterOpen(true)}
+          className="relative w-full rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-md transition-shadow group cursor-zoom-in"
+          aria-label="View Tour Poster"
+        >
+          <img 
+            src="/images/tour-poster.png" 
+            alt="Tour Itinerary Poster" 
+            className="w-full h-auto object-cover block"
+          />
+          <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors flex items-center justify-center">
+             <div className="bg-white/95 backdrop-blur-sm text-slate-800 px-4 py-2 rounded-full font-medium text-sm shadow-sm opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
+               Click to Zoom
+             </div>
+          </div>
+        </button>
+      </div>
+
+      {/* Poster Zoom Modal */}
+      {isPosterOpen && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center p-2 sm:p-6 cursor-zoom-out"
+          onClick={() => setIsPosterOpen(false)}
+        >
+          <button 
+            type="button"
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 bg-white/10 hover:bg-white/20 text-white rounded-full p-2.5 backdrop-blur-md transition-colors z-[101]"
+            onClick={(e) => { e.stopPropagation(); setIsPosterOpen(false); }}
+            aria-label="Close Poster"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          
+          <div 
+            className="relative w-full max-w-5xl max-h-full overflow-auto rounded-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img 
+              src="/images/tour-poster.png" 
+              alt="Tour Itinerary Poster Zoomed" 
+              className="w-full h-auto object-contain cursor-zoom-out"
+              onClick={() => setIsPosterOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
