@@ -31,8 +31,8 @@ export async function GET(request) {
         const t = trains.find(t => t.trainId === ta.trainId);
         trainInfo = {
           mobile: p.mobile,
-          coach: ta.coachNumber,
-          berth: ta.berthNumber,
+          coach: ta.coachNumber || ta.coach || "",
+          berth: ta.berthNumber || ta.berth || "",
           berthType: ta.berthType,
           trainName: t ? t.trainName : "",
           trainNumber: t ? t.trainNumber : ""
@@ -57,8 +57,9 @@ export async function GET(request) {
 
       return {
         ...p,
+        relativeName: p.relationName || p.relativeName || "",
         aadhaarNumber: maskedAadhaar,
-        familyName: fam ? fam.familyName : "Unknown",
+        familyName: fam ? fam.familyName : (p.mobile ? `Family (${p.mobile})` : "Unknown"),
         adminName: adminObj ? adminObj.username : "All",
         train: trainInfo,
         hotels: hotelsInfo
